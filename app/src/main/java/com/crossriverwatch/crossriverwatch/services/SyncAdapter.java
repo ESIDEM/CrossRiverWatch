@@ -3,7 +3,7 @@ package com.crossriverwatch.crossriverwatch.services;
 import android.accounts.Account;
 import android.content.AbstractThreadedSyncAdapter;
 import android.content.ContentProviderClient;
-import android.content.ContentProviderOperation;
+
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -11,24 +11,20 @@ import android.content.SyncResult;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 
 
-import com.crossriverwatch.crossriverwatch.MyLoader;
-import com.crossriverwatch.crossriverwatch.R;
+
+
 import com.crossriverwatch.crossriverwatch.database.NewsContract;
 import com.crossriverwatch.crossriverwatch.parser.RSSItem;
 import com.crossriverwatch.crossriverwatch.parser.ReadRss;
-import com.crossriverwatch.crossriverwatch.task.FetchNewsTask;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
+
 import java.util.List;
 import java.util.Locale;
-
-import static java.lang.String.valueOf;
 
 
 /**
@@ -43,12 +39,20 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     private final static String PREFNAME = "SyncPref";
 
+    private ContentResolver mContentResolver;
+
+    ReadRss rssParser = new ReadRss();
+
+    List<RSSItem> rssItems = new ArrayList<RSSItem>();
+
 
     /**
      * Set up the sync adapter
      */
     public SyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
+
+        mContentResolver = context.getContentResolver();
         /*
          * If your app uses a content resolver, get an instance of it
          * from the incoming Context
@@ -70,7 +74,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
          * If your app uses a content resolver, get an instance of it
          * from the incoming Context
          */
-      //  mContentResolver = context.getContentResolver();
+        mContentResolver = context.getContentResolver();
 
     }
 
@@ -191,10 +195,52 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     /*
      * Put the data transfer code here.
      */
-        new FetchNewsTask().execute();
+        rssItems = rssParser.parse();
+        for(RSSItem item : rssItems){
 
 
-    }}
+
+
+                    Date date = new Date(item.getPubDate());
+                   SimpleDateFormat sdf = new SimpleDateFormat("d LLL yyyy  HH:mm", Locale.getDefault());
+
+
+                    ContentValues contentValues = new ContentValues();
+                    contentValues.put(NewsContract.Entry.COLUMN_NAME_TITLE, item.getTitle());
+                    contentValues.put(NewsContract.Entry.COLUMN_NAME_LINK, item.getLink());
+                    contentValues.put(NewsContract.Entry.COLUMN_NAME_DESCRIPTION, item.getDescription());
+                    contentValues.put(NewsContract.Entry.COLUMN_NAME_FAV, 0);
+                    contentValues.put(NewsContract.Entry.COLUMN_NAME_PUBLISHED, item.getPubDate());
+                    contentValues.put(NewsContract.Entry.COLUMN_NAME_IMAGE_URL, item.getImageUrl());
+
+                    String select = "("+ NewsContract.Entry.COLUMN_NAME_TITLE+ " = ? )";
+                    Uri dirUri = NewsContract.Entry.buildDirUri();
+                    Cursor check = mContentResolver.query(dirUri,new String[]{ NewsContract.Entry.COLUMN_NAME_TITLE},
+                            select,new String[]{item.getTitle()},null,null);
+                    check.moveToFirst();
+                    if(check.getCount() > 0) {
+                        int columIndex = check.getColumnIndex(NewsContract.Entry.COLUMN_NAME_TITLE);
+                        if (item.getTitle().compareTo(check.getString(columIndex)) == 1 ) {
+                            insertEntry(item);
+                        }
+                    }else{
+                        insertEntry(item);
+                    }
+                    check.close();
+                }
+
+
+
+
+
+
+
+
+
+       // new FetchNewsTask().execute();
+
+
+    }
 
 
 
@@ -305,6 +351,22 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 //    }
 
 
+    private void insertEntry(RSSItem entry) {
 
+
+
+
+        ContentValues values = new ContentValues();
+        values.clear();
+
+        values.put(NewsContract.Entry.COLUMN_NAME_TITLE, entry.getTitle());
+        values.put(NewsContract.Entry.COLUMN_NAME_LINK, entry.getLink());
+        values.put(NewsContract.Entry.COLUMN_NAME_DESCRIPTION, entry.getDescription());
+        values.put(NewsContract.Entry.COLUMN_NAME_IMAGE_URL, entry.getImageUrl());
+        values.put(NewsContract.Entry.COLUMN_NAME_PUBLISHED, entry.getPubDate());
+
+
+        mContentResolver.insert(NewsContract.Entry.CONTENT_URI, values);
+    }}
 
 

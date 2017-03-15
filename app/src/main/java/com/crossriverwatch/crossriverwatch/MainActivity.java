@@ -319,7 +319,7 @@ public class MainActivity extends AppCompatActivity
                     //disable cache to avoid garbage collection that may produce crashes
                     .diskCacheStrategy(DiskCacheStrategy.RESULT)
                     .into(holder.thumbnailView);
-            mfav = Integer.valueOf(favourite);
+           // mfav = Integer.valueOf(favourite);
             newsId = mCursor.getInt(MyLoader.Query.COLUMN_ID);
 
         }
