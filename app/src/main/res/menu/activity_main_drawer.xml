@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single"
+        android:id="@+id/nav_1">
+        <item
+            android:id="@+id/nav_latest"
+            android:icon="@drawable/ic_menu_camera"
+            android:title="@string/nav_latest"
+            android:checked="true"/>
+        <item
+            android:id="@+id/nav_politics"
+            android:icon="@drawable/ic_menu_gallery"
+            android:title="@string/nav_politics" />
+        <item
+            android:id="@+id/nav_education"
+            android:icon="@drawable/ic_menu_slideshow"
+            android:title="@string/nav_education" />
+        <item
+            android:id="@+id/nav_sport"
+            android:icon="@drawable/ic_menu_manage"
+            android:title="@string/Sport" />
+        <item
+            android:id="@+id/nav_report"
+            android:icon="@drawable/ic_menu_manage"
+            android:title="@string/nav_report" />
+        <item
+            android:id="@+id/nav_vacancies"
+            android:icon="@drawable/ic_menu_manage"
+            android:title="@string/nav_vacancy" />
+
+        <item
+            android:id="@+id/nav_health"
+            android:icon="@drawable/ic_menu_manage"
+            android:title="@string/nav_health" />
+        <item
+            android:id="@+id/nav_interview"
+            android:icon="@drawable/ic_menu_manage"
+            android:title="@string/nav_interview" />
+        <item
+            android:id="@+id/nav_entertainment"
+            android:icon="@drawable/ic_menu_manage"
+            android:title="@string/nav_entertainment" />
+    </group>
+
+    <group android:checkableBehavior="single"
+        android:id="@+id/nav_2">
+            <item
+                android:id="@+id/nav_favourite"
+                android:icon="@drawable/ic_menu_share"
+                android:title="@string/nav_favourite" />
+            <item
+                android:id="@+id/nav_settings"
+                android:icon="@drawable/ic_menu_send"
+                android:title="@string/nav_settings" />
+       </group>
+
+</menu>
