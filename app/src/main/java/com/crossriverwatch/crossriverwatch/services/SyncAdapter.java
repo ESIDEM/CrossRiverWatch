@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.SyncResult;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 
 
@@ -195,49 +196,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     /*
      * Put the data transfer code here.
      */
-        rssItems = rssParser.parse();
-        for(RSSItem item : rssItems){
 
 
-
-
-                    Date date = new Date(item.getPubDate());
-                   SimpleDateFormat sdf = new SimpleDateFormat("d LLL yyyy  HH:mm", Locale.getDefault());
-
-
-                    ContentValues contentValues = new ContentValues();
-                    contentValues.put(NewsContract.Entry.COLUMN_NAME_TITLE, item.getTitle());
-                    contentValues.put(NewsContract.Entry.COLUMN_NAME_LINK, item.getLink());
-                    contentValues.put(NewsContract.Entry.COLUMN_NAME_DESCRIPTION, item.getDescription());
-                    contentValues.put(NewsContract.Entry.COLUMN_NAME_FAV, 0);
-                    contentValues.put(NewsContract.Entry.COLUMN_NAME_PUBLISHED, item.getPubDate());
-                    contentValues.put(NewsContract.Entry.COLUMN_NAME_IMAGE_URL, item.getImageUrl());
-
-                    String select = "("+ NewsContract.Entry.COLUMN_NAME_TITLE+ " = ? )";
-                    Uri dirUri = NewsContract.Entry.buildDirUri();
-                    Cursor check = mContentResolver.query(dirUri,new String[]{ NewsContract.Entry.COLUMN_NAME_TITLE},
-                            select,new String[]{item.getTitle()},null,null);
-                    check.moveToFirst();
-                    if(check.getCount() > 0) {
-                        int columIndex = check.getColumnIndex(NewsContract.Entry.COLUMN_NAME_TITLE);
-                        if (item.getTitle().compareTo(check.getString(columIndex)) == 1 ) {
-                            insertEntry(item);
-                        }
-                    }else{
-                        insertEntry(item);
-                    }
-                    check.close();
-                }
-
-
-
-
-
-
-
-
-
-       // new FetchNewsTask().execute();
+        new FetchNewsTask().execute();
 
 
     }
@@ -367,6 +328,48 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
 
         mContentResolver.insert(NewsContract.Entry.CONTENT_URI, values);
-    }}
+    }
+
+    private class FetchNewsTask extends AsyncTask<Void,Void,Void>{
+
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+
+            rssItems = rssParser.parse();
+            for(RSSItem item : rssItems){
+
+
+
+
+                ContentValues contentValues = new ContentValues();
+                contentValues.put(NewsContract.Entry.COLUMN_NAME_TITLE, item.getTitle());
+                contentValues.put(NewsContract.Entry.COLUMN_NAME_LINK, item.getLink());
+                contentValues.put(NewsContract.Entry.COLUMN_NAME_DESCRIPTION, item.getDescription());
+                contentValues.put(NewsContract.Entry.COLUMN_NAME_FAV, 0);
+                contentValues.put(NewsContract.Entry.COLUMN_NAME_PUBLISHED, item.getPubDate());
+                contentValues.put(NewsContract.Entry.COLUMN_NAME_IMAGE_URL, item.getImageUrl());
+
+                String select = "("+ NewsContract.Entry.COLUMN_NAME_TITLE+ " = ? )";
+                Uri dirUri = NewsContract.Entry.buildDirUri();
+                Cursor check = mContentResolver.query(dirUri,new String[]{ NewsContract.Entry.COLUMN_NAME_TITLE},
+                        select,new String[]{item.getTitle()},null,null);
+                check.moveToFirst();
+                if(check.getCount() > 0) {
+                    int columIndex = check.getColumnIndex(NewsContract.Entry.COLUMN_NAME_TITLE);
+                    if (item.getTitle().compareTo(check.getString(columIndex)) == 1 ) {
+                        insertEntry(item);
+                    }
+                }else{
+                    insertEntry(item);
+                }
+                check.close();
+            }
+
+
+            return null;
+        }
+    }
+}
 
 
