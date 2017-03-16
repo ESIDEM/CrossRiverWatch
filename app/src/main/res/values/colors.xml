@@ -4,5 +4,7 @@
     <color name="colorPrimaryDark">#23282D</color>
     <color name="background">#F1F1F3</color>
     <color name="colorAccent">#FF4081</color>
+    <color name="transparent">#00000000</color>
+    <color name="app_background2">#FFEEEEEE</color>
 
 </resources>

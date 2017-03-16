@@ -8,6 +8,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
@@ -21,6 +22,9 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.support.v7.graphics.Palette;
 
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -28,17 +32,30 @@ import com.crossriverwatch.crossriverwatch.database.NewsContract;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+
+import java.io.IOException;
+
 public class NewsDetailActivity extends AppCompatActivity {
 
-    private  long id;
-    private   String title;
+    private long id;
+    private String title;
     private TextView title_textView;
-    private  TextView detailsView;
+    //private TextView detailsView;
     private Context context;
     private String url;
     private String photoUrl;
     private ImageView detailImage;
     private String detailStr;
+    private WebView webView;
+
+    // WebView params
+    private final String base = "file:///android_asset/";
+    private final String mime = "text/html";
+    private final String encoding = "utf-8";
+    private final String history = null;
+
 
 
     private CollapsingToolbarLayout collapsingToolbarLayout;
@@ -70,18 +87,26 @@ public class NewsDetailActivity extends AppCompatActivity {
 
         id = bundle.getLong("rowId");
         getNewsDetail();
-        title_textView = (TextView) findViewById(R.id.title_view);
+       // title_textView = (TextView) findViewById(R.id.title_view);
 
-        detailsView = (TextView) findViewById(R.id.description_view);
+        //detailsView = (TextView) findViewById(R.id.description_view);
 
         detailImage = (ImageView) findViewById(R.id.image_view);
+        webView = (WebView) findViewById(R.id.webView);
+        // webView = new WebViewHelper().webview(this);
+        WebSettings ws = webView.getSettings();
+        ws.setJavaScriptEnabled(true);
+
+        new FetchDetails().execute();
+
 
         collapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
         collapsingToolbarLayout.setTitle(title);
         collapsingToolbarLayout.setExpandedTitleColor(getResources().getColor(android.R.color.transparent));
 
         Picasso.with(this).load(photoUrl).into(detailImage, new Callback() {
-            @Override public void onSuccess() {
+            @Override
+            public void onSuccess() {
                 Bitmap bitmap = ((BitmapDrawable) detailImage.getDrawable()).getBitmap();
                 Palette.from(bitmap).generate(new Palette.PaletteAsyncListener() {
                     public void onGenerated(Palette palette) {
@@ -90,16 +115,24 @@ public class NewsDetailActivity extends AppCompatActivity {
                 });
             }
 
-            @Override public void onError() {
+            @Override
+            public void onError() {
 
             }
         });
 
-        title_textView.setText(title);
-        detailsView.setText(detailStr);
+       // title_textView.setText(title);
+        // detailsView.setText(detailStr);
+
+        // Load actual article content async, after the view is drawn
+        // webView.loadDataWithBaseURL(base, getCleanContent(), mime, encoding, history);
+
+
     }
 
-    @Override public boolean dispatchTouchEvent(MotionEvent motionEvent) {
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent motionEvent) {
         try {
             return super.dispatchTouchEvent(motionEvent);
         } catch (NullPointerException e) {
@@ -133,7 +166,7 @@ public class NewsDetailActivity extends AppCompatActivity {
         fab.setBackgroundTintList(ColorStateList.valueOf(vibrantColor));
     }
 
-    private void getNewsDetail(){
+    private void getNewsDetail() {
 
         String[] projection = {
                 NewsContract.Entry._ID,
@@ -163,5 +196,56 @@ public class NewsDetailActivity extends AppCompatActivity {
 
 
     }
+
+
+    private class FetchDetails extends AsyncTask<Document, Void, Document> {
+
+
+
+        @Override
+        protected Document doInBackground(Document... documents) {
+
+             Document document = null;
+
+
+            try {
+                document = Jsoup.connect(url).get();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            document.getElementsByClass("breaking-news").remove();
+            document.getElementsByClass("category-title").remove();
+            document.getElementsByClass("short-link").remove();
+            document.getElementsByClass("sidebar main-sidebar").remove();
+            document.getElementsByClass("mom-social-share ss-horizontal border-box").remove();
+           document.getElementsByClass("addtoany_share_save_container addtoany_content_top").remove();
+            document.getElementsByClass("addtoany_share_save_container addtoany_content_bottom").remove();
+            document.getElementsByClass("copyrights-area").remove();
+            document.getElementsByClass("np-posts").remove();
+            document.getElementsByClass("post-tags").remove();
+            document.getElementsByClass("mom-e3lanat-wrap").remove();
+            document.getElementsByClass("short-link").remove();
+            document.getElementsByClass("single-title").remove();
+            document.getElementsByClass("base-box single-box about-the-author").remove();
+            document.getElementsByClass("base-box single-box").remove();
+            //document.getElementsByClass("short-link").remove();
+            //document.getElementsByClass("short-link").remove();
+            //document.getElementsByClass("short-link").remove();
+            //document.getElementsByClass("short-link").remove();
+            document.getElementById("header-wrapper").remove();
+            document.getElementById("navigation").remove();
+            document.getElementById("footer").remove();
+            return document;
+        }
+
+        @Override
+        protected void onPostExecute(Document document) {
+
+            webView.loadDataWithBaseURL(base, document.toString(), "text/html", "utf-8", "");
+            super.onPostExecute(document);
+        }
+    }
+
 
 }
