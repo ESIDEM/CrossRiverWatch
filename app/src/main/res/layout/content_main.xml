@@ -18,10 +18,19 @@
         android:layout_height="wrap_content"
         >
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/recyclerView"
+        <!--<android.support.v7.widget.RecyclerView-->
+            <!--android:id="@+id/recyclerView"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"  />-->
+        <com.cooltechworks.views.shimmer.ShimmerRecyclerView
+            android:id="@+id/shimmer_recycler_view"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"  />
+            android:layout_height="match_parent"
+            android:paddingBottom="10dp"
+            android:paddingTop="10dp"
+            app:demo_child_count="10"
+            app:demo_layout="@layout/layout_demo"
+            />
     </android.support.v4.widget.SwipeRefreshLayout>
     <TextView
         android:id="@+id/show_net_text"

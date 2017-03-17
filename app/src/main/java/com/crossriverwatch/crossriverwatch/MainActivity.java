@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.LoaderManager;
@@ -31,9 +32,12 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.cooltechworks.views.shimmer.ShimmerRecyclerView;
 import com.crossriverwatch.crossriverwatch.database.NewsContract;
 import com.crossriverwatch.crossriverwatch.services.SyncUtils;
 import com.crossriverwatch.crossriverwatch.utility.ConnectionTest;
+
+
 
 
 import static android.view.View.GONE;
@@ -50,7 +54,9 @@ public class MainActivity extends AppCompatActivity
     protected TextView mEmptyView;
     protected SwipeRefreshLayout mSwipeContainer;
     private RecyclerView mRecyclerView;
+    private ShimmerRecyclerView shimmerRecycler;
     boolean isConnected;
+    RecyclerView.LayoutManager layoutManager;
 
 
 
@@ -74,7 +80,10 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-        mRecyclerView = (RecyclerView) findViewById(R.id.recyclerView);
+        //mRecyclerView = (RecyclerView) findViewById(R.id.recyclerView);
+
+        shimmerRecycler = (ShimmerRecyclerView) findViewById(R.id.shimmer_recycler_view);
+        shimmerRecycler.setLayoutManager(layoutManager);
         mEmptyView = (TextView) findViewById(R.id.show_net_text);
         mSwipeContainer = (SwipeRefreshLayout)findViewById(R.id.swipeContainer);
         mSwipeContainer.setOnRefreshListener(this);
@@ -190,12 +199,13 @@ public class MainActivity extends AppCompatActivity
         Adapter adapter = new Adapter(cursor);
         adapter.setHasStableIds(true);
 
-        mRecyclerView.addItemDecoration(new NewsDivider());
+       // mRecyclerView.addItemDecoration(new NewsDivider());
 
-        mRecyclerView.setAdapter(adapter);
+       // mRecyclerView.setAdapter(adapter);
+        shimmerRecycler.setAdapter(adapter);
         LinearLayoutManager lm =
                 new LinearLayoutManager(this);
-        mRecyclerView.setLayoutManager(lm);
+        shimmerRecycler.setLayoutManager(lm);
         if(cursor.getCount()==0) {
 
             mEmptyView.setVisibility(VISIBLE);
@@ -208,7 +218,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-        mRecyclerView.setAdapter(null);
+        shimmerRecycler.setAdapter(null);
     }
 
     @Override
@@ -261,7 +271,7 @@ public class MainActivity extends AppCompatActivity
 
         @Override
         public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View view = getLayoutInflater().inflate(R.layout.news_item, parent, false);
+            View view = getLayoutInflater().inflate(R.layout.layout_news_card, parent, false);
 
             final ViewHolder vh = new ViewHolder(view);
             view.setOnClickListener(new View.OnClickListener() {
@@ -303,6 +313,7 @@ public class MainActivity extends AppCompatActivity
             holder.titleView.setText(mCursor.getString(MyLoader.Query.COLUMN_TITLE));
 
             holder.pubDate.setText(mCursor.getString(MyLoader.Query.COLUMN_PUB_DATE));
+            holder.description.setText(mCursor.getString(MyLoader.Query.COLUMN_DESC));
         final String favourite = mCursor.getString(MyLoader.Query.COLUMN_FAV);
 
 
@@ -345,15 +356,16 @@ public class MainActivity extends AppCompatActivity
         public ImageView thumbnailView;
         public TextView titleView;
        // public String favourite;
+        public TextView description;
         public TextView pubDate;
 
 
         public ViewHolder(View view) {
             super(view);
-            thumbnailView = (ImageView) view.findViewById(R.id.news_image);
-            titleView = (TextView) view.findViewById(R.id.news_title);
-
-            pubDate = (TextView) view.findViewById(R.id.news_date);
+            thumbnailView = (ImageView) view.findViewById(R.id.card_image);
+            titleView = (TextView) view.findViewById(R.id.card_title);
+            description =(TextView) view.findViewById(R.id.card_subtitle);
+            pubDate = (TextView) view.findViewById(R.id.card_summary);
 
 
         }
@@ -369,5 +381,6 @@ public class MainActivity extends AppCompatActivity
 //            }
 //        }, time);
 //    }
+
 
 }

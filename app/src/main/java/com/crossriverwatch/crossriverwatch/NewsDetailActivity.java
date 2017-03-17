@@ -1,5 +1,6 @@
 package com.crossriverwatch.crossriverwatch;
 
+import android.app.ProgressDialog;
 import android.content.ContentResolver;
 import android.content.Context;
 
@@ -18,6 +19,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.transition.Slide;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.support.v7.graphics.Palette;
@@ -37,6 +39,9 @@ import org.jsoup.nodes.Document;
 
 import java.io.IOException;
 
+import static com.crossriverwatch.crossriverwatch.R.id.webView;
+import static org.jsoup.nodes.Entities.EscapeMode.base;
+
 public class NewsDetailActivity extends AppCompatActivity {
 
     private long id;
@@ -44,11 +49,13 @@ public class NewsDetailActivity extends AppCompatActivity {
     private TextView title_textView;
     //private TextView detailsView;
     private Context context;
-    private String url;
+    public String url;
     private String photoUrl;
     private ImageView detailImage;
     private String detailStr;
     private WebView webView;
+    private ProgressDialog progressDialog;
+    Document document ;
 
     // WebView params
     private final String base = "file:///android_asset/";
@@ -86,8 +93,11 @@ public class NewsDetailActivity extends AppCompatActivity {
         Bundle bundle = this.getIntent().getExtras();
 
         id = bundle.getLong("rowId");
-        getNewsDetail();
-       // title_textView = (TextView) findViewById(R.id.title_view);
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage(getString(R.string.progress_dialogue));
+        progressDialog.show();
+
+        // title_textView = (TextView) findViewById(R.id.title_view);
 
         //detailsView = (TextView) findViewById(R.id.description_view);
 
@@ -97,12 +107,15 @@ public class NewsDetailActivity extends AppCompatActivity {
         WebSettings ws = webView.getSettings();
         ws.setJavaScriptEnabled(true);
 
-        new FetchDetails().execute();
+        getNewsDetail();
+
+
 
 
         collapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
         collapsingToolbarLayout.setTitle(title);
         collapsingToolbarLayout.setExpandedTitleColor(getResources().getColor(android.R.color.transparent));
+        new FetchDetails().execute();
 
         Picasso.with(this).load(photoUrl).into(detailImage, new Callback() {
             @Override
@@ -121,7 +134,7 @@ public class NewsDetailActivity extends AppCompatActivity {
             }
         });
 
-       // title_textView.setText(title);
+        // title_textView.setText(title);
         // detailsView.setText(detailStr);
 
         // Load actual article content async, after the view is drawn
@@ -129,6 +142,19 @@ public class NewsDetailActivity extends AppCompatActivity {
 
 
     }
+
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event)
+    {
+        if ((keyCode == KeyEvent.KEYCODE_BACK))
+        {
+            finish();
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
+
 
 
     @Override
@@ -168,6 +194,9 @@ public class NewsDetailActivity extends AppCompatActivity {
 
     private void getNewsDetail() {
 
+//        progressDialog.setMessage(getString(R.string.progress_dialogue));
+//        progressDialog.show();
+
         String[] projection = {
                 NewsContract.Entry._ID,
                 NewsContract.Entry.COLUMN_NAME_TITLE,
@@ -195,7 +224,69 @@ public class NewsDetailActivity extends AppCompatActivity {
         }
 
 
-    }
+
+
+
+
+
+//        Thread thread = new Thread(new Runnable() {
+//            Document document = null;
+//            @Override
+//            public void run() {
+//
+//
+//
+//                try {
+//                    document = Jsoup.connect(url).get();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//
+//                document.getElementsByClass("breaking-news").remove();
+//                document.getElementsByClass("category-title").remove();
+//                document.getElementsByClass("short-link").remove();
+//                document.getElementsByClass("sidebar main-sidebar").remove();
+//                document.getElementsByClass("mom-social-share ss-horizontal border-box").remove();
+//                document.getElementsByClass("addtoany_share_save_container addtoany_content_top").remove();
+//                document.getElementsByClass("addtoany_share_save_container addtoany_content_bottom").remove();
+//                document.getElementsByClass("copyrights-area").remove();
+//                document.getElementsByClass("np-posts").remove();
+//                document.getElementsByClass("post-tags").remove();
+//                document.getElementsByClass("mom-e3lanat-wrap").remove();
+//                document.getElementsByClass("short-link").remove();
+//                document.getElementsByClass("single-title").remove();
+//                document.getElementsByClass("base-box single-box about-the-author").remove();
+//                document.getElementsByClass("base-box single-box").remove();
+//                //document.getElementsByClass("short-link").remove();
+//                //document.getElementsByClass("short-link").remove();
+//                //document.getElementsByClass("short-link").remove();
+//                //document.getElementsByClass("short-link").remove();
+//                document.getElementById("header-wrapper").remove();
+//                document.getElementById("navigation").remove();
+//                document.getElementById("footer").remove();
+//                NewsDetailActivity.this.runOnUiThread(new Runnable() {
+//
+//                    @Override
+//                    public void run() {
+//                        if (document.toString() != null ) {
+//
+//                            webView.loadDataWithBaseURL(base, document.toString(), "text/html", "utf-8", "");
+//
+//                        }
+//
+////                        progressDialog.dismiss();
+//                    }
+//                });
+//            }
+//        });
+//        thread.start();
+
+}
+
+
+
+
+
 
 
     private class FetchDetails extends AsyncTask<Document, Void, Document> {
@@ -205,7 +296,7 @@ public class NewsDetailActivity extends AppCompatActivity {
         @Override
         protected Document doInBackground(Document... documents) {
 
-             Document document = null;
+
 
 
             try {
@@ -219,7 +310,7 @@ public class NewsDetailActivity extends AppCompatActivity {
             document.getElementsByClass("short-link").remove();
             document.getElementsByClass("sidebar main-sidebar").remove();
             document.getElementsByClass("mom-social-share ss-horizontal border-box").remove();
-           document.getElementsByClass("addtoany_share_save_container addtoany_content_top").remove();
+            document.getElementsByClass("addtoany_share_save_container addtoany_content_top").remove();
             document.getElementsByClass("addtoany_share_save_container addtoany_content_bottom").remove();
             document.getElementsByClass("copyrights-area").remove();
             document.getElementsByClass("np-posts").remove();
@@ -243,6 +334,8 @@ public class NewsDetailActivity extends AppCompatActivity {
         protected void onPostExecute(Document document) {
 
             webView.loadDataWithBaseURL(base, document.toString(), "text/html", "utf-8", "");
+
+            progressDialog.dismiss();
             super.onPostExecute(document);
         }
     }

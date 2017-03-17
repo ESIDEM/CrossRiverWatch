@@ -34,4 +34,5 @@
     <string name="added_favorite">Saved to favorites</string>
     <string name="removed_favorite">Removed from favorites</string>
     <string name="title_activity_news_detail">NewsDetailActivity</string>
+    <string name="progress_dialogue">Please Wait.. </string>
 </resources>
