@@ -4,8 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginLeft="16dp"
-    android:layout_marginRight="16dp"
+
     android:layout_marginTop="4dp"
     android:layout_marginBottom="4dp"
     android:paddingTop="16dp"
@@ -40,23 +39,37 @@
                 tools:text="@string/news_title"
                 />
 
+            <!--<TextView-->
+                <!--android:id="@+id/card_subtitle"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:ellipsize="end"-->
+                <!--android:maxLines="4"-->
+                <!--android:paddingLeft="16dp"-->
+                <!--android:paddingRight="16dp"-->
+                <!--android:textColor="@color/textSecondary"-->
+                <!--android:textSize="14sp"-->
+                <!--tools:text="@string/news_desc"/>-->
+
             <TextView
-                android:id="@+id/card_subtitle"
+                android:id="@+id/card_summary"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:ellipsize="end"
                 android:maxLines="4"
+                android:layout_marginTop="8dp"
                 android:paddingLeft="16dp"
                 android:paddingRight="16dp"
-                android:textColor="@color/textSecondary"
+
+                android:textColor="@color/textPrimary"
                 android:textSize="14sp"
-                tools:text="@string/news_desc"/>
+                tools:text="@string/news_date"
+                />
 
         </LinearLayout>
 
         <ImageView
             android:id="@+id/card_image"
-            android:layout_width="78dp"
+            android:layout_width="90dp"
             android:layout_height="78dp"
             android:layout_marginRight="16dp"
             android:src="#16000000"
@@ -64,17 +77,6 @@
 
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/card_summary"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:maxLines="4"
-        android:layout_marginTop="8dp"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp"
-        android:textColor="@color/textPrimary"
-        android:textSize="14sp"
-        tools:text="@string/news_date"
-        />
+
 
 </LinearLayout>

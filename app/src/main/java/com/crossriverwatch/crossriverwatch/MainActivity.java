@@ -38,8 +38,7 @@ import com.crossriverwatch.crossriverwatch.services.SyncUtils;
 import com.crossriverwatch.crossriverwatch.utility.ConnectionTest;
 
 
-
-
+import static android.R.attr.description;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
@@ -271,7 +270,7 @@ public class MainActivity extends AppCompatActivity
 
         @Override
         public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View view = getLayoutInflater().inflate(R.layout.layout_news_card, parent, false);
+            View view = getLayoutInflater().inflate(R.layout.news_item, parent, false);
 
             final ViewHolder vh = new ViewHolder(view);
             view.setOnClickListener(new View.OnClickListener() {
@@ -313,7 +312,7 @@ public class MainActivity extends AppCompatActivity
             holder.titleView.setText(mCursor.getString(MyLoader.Query.COLUMN_TITLE));
 
             holder.pubDate.setText(mCursor.getString(MyLoader.Query.COLUMN_PUB_DATE));
-            holder.description.setText(mCursor.getString(MyLoader.Query.COLUMN_DESC));
+           // holder.description.setText(mCursor.getString(MyLoader.Query.COLUMN_DESC));
         final String favourite = mCursor.getString(MyLoader.Query.COLUMN_FAV);
 
 
@@ -356,16 +355,16 @@ public class MainActivity extends AppCompatActivity
         public ImageView thumbnailView;
         public TextView titleView;
        // public String favourite;
-        public TextView description;
+       // public TextView description;
         public TextView pubDate;
 
 
         public ViewHolder(View view) {
             super(view);
-            thumbnailView = (ImageView) view.findViewById(R.id.card_image);
-            titleView = (TextView) view.findViewById(R.id.card_title);
-            description =(TextView) view.findViewById(R.id.card_subtitle);
-            pubDate = (TextView) view.findViewById(R.id.card_summary);
+            thumbnailView = (ImageView) view.findViewById(R.id.news_image);
+            titleView = (TextView) view.findViewById(R.id.news_title);
+           // description =(TextView) view.findViewById(R.id.card_subtitle);
+            pubDate = (TextView) view.findViewById(R.id.news_date);
 
 
         }

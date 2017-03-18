@@ -35,4 +35,6 @@
     <string name="removed_favorite">Removed from favorites</string>
     <string name="title_activity_news_detail">NewsDetailActivity</string>
     <string name="progress_dialogue">Please Wait.. </string>
+    <string name="title_activity_favourite_list">FavouriteListActivity</string>
+    <string name="no_favourite_news">Please add some News to your Favourite List.</string>
 </resources>

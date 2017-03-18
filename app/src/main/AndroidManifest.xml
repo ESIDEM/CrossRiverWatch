@@ -59,9 +59,18 @@
 
         <activity
             android:name=".NewsDetailActivity"
+            android:configChanges="orientation|screenSize"
             android:label="@string/title_activity_news_detail"
             android:parentActivityName=".MainActivity"
-            android:configChanges="orientation|screenSize"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.crossriverwatch.crossriverwatch.MainActivity" />
+        </activity>
+        <activity
+            android:name=".FavouriteListActivity"
+            android:label="@string/title_activity_favourite_list"
+            android:parentActivityName=".MainActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
