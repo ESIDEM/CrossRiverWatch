@@ -2,6 +2,7 @@ package com.crossriverwatch.crossriverwatch;
 
 import android.app.ProgressDialog;
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 
 import android.content.res.ColorStateList;
@@ -19,18 +20,24 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.transition.Slide;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.support.v7.graphics.Palette;
 
+import android.webkit.WebChromeClient;
+import android.webkit.WebResourceError;
+import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.crossriverwatch.crossriverwatch.database.NewsContract;
+import com.crossriverwatch.crossriverwatch.database.NewsProvider;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
@@ -39,8 +46,7 @@ import org.jsoup.nodes.Document;
 
 import java.io.IOException;
 
-import static com.crossriverwatch.crossriverwatch.R.id.webView;
-import static org.jsoup.nodes.Entities.EscapeMode.base;
+
 
 public class NewsDetailActivity extends AppCompatActivity {
 
@@ -55,7 +61,9 @@ public class NewsDetailActivity extends AppCompatActivity {
     private String detailStr;
     private WebView webView;
     private ProgressDialog progressDialog;
-    Document document ;
+
+    private FloatingActionButton mFab;
+    private int mFav;
 
     // WebView params
     private final String base = "file:///android_asset/";
@@ -95,11 +103,13 @@ public class NewsDetailActivity extends AppCompatActivity {
         id = bundle.getLong("rowId");
         progressDialog = new ProgressDialog(this);
         progressDialog.setMessage(getString(R.string.progress_dialogue));
-        progressDialog.show();
+
 
         // title_textView = (TextView) findViewById(R.id.title_view);
 
         //detailsView = (TextView) findViewById(R.id.description_view);
+
+        mFab = (FloatingActionButton) findViewById(R.id.favButton);
 
         detailImage = (ImageView) findViewById(R.id.image_view);
         webView = (WebView) findViewById(R.id.webView);
@@ -108,6 +118,27 @@ public class NewsDetailActivity extends AppCompatActivity {
         ws.setJavaScriptEnabled(true);
 
         getNewsDetail();
+
+        mFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String toatsText;
+                if(mFav == 1) {
+                    mFab.setImageResource(R.drawable.ic_action_action_favorite_outline);
+                    toatsText = getString(R.string.removed_favorite);
+                    mFav = 0;
+                }else{
+                    mFab.setImageResource(R.drawable.ic_action_action_favorite);
+                    mFav = 1;
+                    toatsText = getString(R.string.added_favorite);
+                }
+                saveOrRemoveReadlist();
+
+                Toast.makeText(getApplicationContext(),toatsText,Toast.LENGTH_SHORT).show();
+
+            }
+        });
+
 
 
 
@@ -152,6 +183,34 @@ public class NewsDetailActivity extends AppCompatActivity {
             finish();
         }
         return super.onKeyDown(keyCode, event);
+    }
+
+    public void onStart()
+    {
+        getNewsDetail();
+        super.onStart();
+
+    }
+
+    public void onPause()
+    {
+        finish();
+        super.onPause();
+
+    }
+
+    public void onStop()
+    {
+        finish();
+        super.onStop();
+
+    }
+
+    public void onRestart()
+    {
+        getNewsDetail();
+        super.onRestart();
+
     }
 
 
@@ -202,6 +261,7 @@ public class NewsDetailActivity extends AppCompatActivity {
                 NewsContract.Entry.COLUMN_NAME_TITLE,
                 NewsContract.Entry.COLUMN_NAME_LINK,
                 NewsContract.Entry.COLUMN_NAME_IMAGE_URL,
+                NewsContract.Entry.COLUMN_NAME_FAV,
                 NewsContract.Entry.COLUMN_NAME_DESCRIPTION};
 
         Uri uri = Uri.parse(NewsContract.Entry.CONTENT_URI + "/" + id);
@@ -214,74 +274,33 @@ public class NewsDetailActivity extends AppCompatActivity {
             String mUrl = cursor.getString(cursor.getColumnIndexOrThrow(NewsContract.Entry.COLUMN_NAME_LINK));
             String imageUrl = cursor.getString(cursor.getColumnIndexOrThrow(NewsContract.Entry.COLUMN_NAME_IMAGE_URL));
             String detals = cursor.getString(cursor.getColumnIndexOrThrow(NewsContract.Entry.COLUMN_NAME_DESCRIPTION));
+            int favourite = Integer.valueOf(cursor.getString(cursor.getColumnIndexOrThrow(NewsContract.Entry.COLUMN_NAME_FAV)));
 
             title = mTitle;
             url = mUrl;
             photoUrl = imageUrl;
             detailStr = detals;
+            mFav = favourite;
+
+            if(mFav == 1) {
+                mFab.setImageResource(R.drawable.ic_action_action_favorite);
+            }else{
+                mFab.setImageResource(R.drawable.ic_action_action_favorite_outline);
+            }
 
 
         }
 
-
-
-
-
-
-
-//        Thread thread = new Thread(new Runnable() {
-//            Document document = null;
-//            @Override
-//            public void run() {
-//
-//
-//
-//                try {
-//                    document = Jsoup.connect(url).get();
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//
-//                document.getElementsByClass("breaking-news").remove();
-//                document.getElementsByClass("category-title").remove();
-//                document.getElementsByClass("short-link").remove();
-//                document.getElementsByClass("sidebar main-sidebar").remove();
-//                document.getElementsByClass("mom-social-share ss-horizontal border-box").remove();
-//                document.getElementsByClass("addtoany_share_save_container addtoany_content_top").remove();
-//                document.getElementsByClass("addtoany_share_save_container addtoany_content_bottom").remove();
-//                document.getElementsByClass("copyrights-area").remove();
-//                document.getElementsByClass("np-posts").remove();
-//                document.getElementsByClass("post-tags").remove();
-//                document.getElementsByClass("mom-e3lanat-wrap").remove();
-//                document.getElementsByClass("short-link").remove();
-//                document.getElementsByClass("single-title").remove();
-//                document.getElementsByClass("base-box single-box about-the-author").remove();
-//                document.getElementsByClass("base-box single-box").remove();
-//                //document.getElementsByClass("short-link").remove();
-//                //document.getElementsByClass("short-link").remove();
-//                //document.getElementsByClass("short-link").remove();
-//                //document.getElementsByClass("short-link").remove();
-//                document.getElementById("header-wrapper").remove();
-//                document.getElementById("navigation").remove();
-//                document.getElementById("footer").remove();
-//                NewsDetailActivity.this.runOnUiThread(new Runnable() {
-//
-//                    @Override
-//                    public void run() {
-//                        if (document.toString() != null ) {
-//
-//                            webView.loadDataWithBaseURL(base, document.toString(), "text/html", "utf-8", "");
-//
-//                        }
-//
-////                        progressDialog.dismiss();
-//                    }
-//                });
-//            }
-//        });
-//        thread.start();
-
 }
+
+    private void saveOrRemoveReadlist()
+    {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(NewsContract.Entry.COLUMN_NAME_FAV, mFav);
+        Uri uri = Uri.parse(NewsContract.Entry.CONTENT_URI + "/" + id);
+
+        this.getContentResolver().update(uri,contentValues,null,null);
+    }
 
 
 
@@ -291,20 +310,25 @@ public class NewsDetailActivity extends AppCompatActivity {
 
     private class FetchDetails extends AsyncTask<Document, Void, Document> {
 
+        @Override
+        protected void onPreExecute() {
 
+            progressDialog.show();
+            super.onPreExecute();
+        }
 
         @Override
         protected Document doInBackground(Document... documents) {
 
-
-
-
+            Document document = null;
             try {
-                document = Jsoup.connect(url).get();
+                document = Jsoup.connect(url.toString()).
+                        userAgent("Mozilla/5.0 (Windows NT 5.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.110 Safari/537.36").get();
             } catch (IOException e) {
                 e.printStackTrace();
             }
 
+            if(document!=null){
             document.getElementsByClass("breaking-news").remove();
             document.getElementsByClass("category-title").remove();
             document.getElementsByClass("short-link").remove();
@@ -329,13 +353,49 @@ public class NewsDetailActivity extends AppCompatActivity {
             document.getElementById("footer").remove();
             return document;
         }
+        return null;
+        }
+
 
         @Override
         protected void onPostExecute(Document document) {
 
-            webView.loadDataWithBaseURL(base, document.toString(), "text/html", "utf-8", "");
+            if(document!=null) {
 
-            progressDialog.dismiss();
+                webView.setWebChromeClient(new WebChromeClient());
+
+                webView.setWebViewClient(new WebViewClient() {
+                    @Override
+                    public void onPageStarted(WebView view, String url, Bitmap favicon) {
+                        super.onPageStarted(view, url, favicon);
+
+
+
+                    }
+
+                    @Override
+                    public void onPageFinished(WebView view, String url) {
+                        super.onPageFinished(view, url);
+                        progressDialog.dismiss();
+                    }
+
+                    @Override
+                    public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
+                        super.onReceivedError(view, request, error);
+                        Toast.makeText(getApplicationContext(), "Cannot load page", Toast.LENGTH_SHORT).show();
+                        progressDialog.dismiss();
+                    }
+                });
+
+                webView.loadDataWithBaseURL(base, document.toString(), "text/html", "utf-8", "");
+
+               // progressDialog.dismiss();
+            }else {
+
+                Toast.makeText(getApplicationContext(),"Unable to load News details ", Toast.LENGTH_LONG).show();
+
+                progressDialog.dismiss();
+            }
             super.onPostExecute(document);
         }
     }

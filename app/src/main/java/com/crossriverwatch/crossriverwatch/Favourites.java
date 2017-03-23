@@ -1,18 +1,22 @@
 package com.crossriverwatch.crossriverwatch;
 
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.net.Uri;
-import android.support.v4.app.Fragment;
+
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -22,17 +26,13 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.cooltechworks.views.shimmer.ShimmerRecyclerView;
 import com.crossriverwatch.crossriverwatch.database.NewsContract;
-import com.crossriverwatch.crossriverwatch.database.NewsProvider;
+
 import com.crossriverwatch.crossriverwatch.utility.ConnectionTest;
 
-import static android.R.attr.data;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
-/**
- * A placeholder fragment containing a simple view.
- */
-public class FavouriteListActivityFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>{
+public class Favourites extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
     String[] PROJECTION = {
             NewsContract.Entry._ID,
@@ -47,49 +47,48 @@ public class FavouriteListActivityFragment extends Fragment implements LoaderMan
     private ShimmerRecyclerView shimmerRecycler;
     boolean isConnected;
 
-
-    public FavouriteListActivityFragment() {
-    }
-
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View view= inflater.inflate(R.layout.fragment_favourite_list, container, false);
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_favourites);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
-        shimmerRecycler = (ShimmerRecyclerView) view.findViewById(R.id.shimmer_recycler_view);
-        mEmptyView = (TextView) view.findViewById(R.id.empty_favourite);
-        isConnected = ConnectionTest.isNetworkAvailable(getContext());
-        getLoaderManager().initLoader(0, null, this);
 
-        return view;
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        shimmerRecycler = (ShimmerRecyclerView) findViewById(R.id.shimmer_recycler_view);
+        mEmptyView = (TextView) findViewById(R.id.no_favourite_text);
+        isConnected = ConnectionTest.isNetworkAvailable(this);
+        getSupportLoaderManager().initLoader(0, null, this);
+
+
     }
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+
         String order  = NewsContract.Entry.COLUMN_NAME_PUBLISHED+" DESC";
         String select = NewsContract.Entry.COLUMN_NAME_FAV + " = ?";
-        return new CursorLoader(getActivity(),
+        return new CursorLoader(this,
                 NewsContract.Entry.CONTENT_URI,
                 PROJECTION,
                 select,
                 new String[]{"1"},
                 order);
+
     }
 
     @Override
-    public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
 
-        Adapter adapter = new Adapter(cursor);
+        FavAdapter adapter = new FavAdapter(data);
         adapter.setHasStableIds(true);
-
-        // mRecyclerView.addItemDecoration(new NewsDivider());
-
-        // mRecyclerView.setAdapter(adapter);
         shimmerRecycler.setAdapter(adapter);
         LinearLayoutManager lm =
-                new LinearLayoutManager(getContext());
+                new LinearLayoutManager(this);
         shimmerRecycler.setLayoutManager(lm);
-        if(cursor.getCount()==0) {
+        if(data.getCount()==0) {
 
             mEmptyView.setVisibility(VISIBLE);
         }else{
@@ -101,21 +100,21 @@ public class FavouriteListActivityFragment extends Fragment implements LoaderMan
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
+
         shimmerRecycler.setAdapter(null);
+
     }
 
-
-
-    private class Adapter extends RecyclerView.Adapter<FavouriteListActivityFragment.ViewHolder>  {
-
+    private class FavAdapter extends RecyclerView.Adapter<ViewHolder>{
 
         public int mfav;
+        private Context context;
         public int newsId;
 
         private Cursor mCursor ;
 
 
-        public Adapter(Cursor cursor) {
+        public FavAdapter(Cursor cursor) {
             mCursor = cursor;
         }
 
@@ -126,10 +125,10 @@ public class FavouriteListActivityFragment extends Fragment implements LoaderMan
         }
 
         @Override
-        public FavouriteListActivityFragment.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View view = getLayoutInflater().inflate(R.layout.layout_news_card, parent, false);
+        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            View view = getLayoutInflater().inflate(R.layout.news_item, parent, false);
 
-            final FavouriteListActivityFragment.ViewHolder vh = new FavouriteListActivityFragment.ViewHolder(view);
+            final ViewHolder vh = new ViewHolder(view);
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -144,14 +143,14 @@ public class FavouriteListActivityFragment extends Fragment implements LoaderMan
                         long rowId = getItemId(vh.getAdapterPosition());
 
 
-                        Intent feedDetail = new Intent(getContext(), NewsDetailActivity.class);
+                        Intent feedDetail = new Intent(getApplicationContext(), NewsDetailActivity.class);
                         Bundle bundle = new Bundle();
                         bundle.putLong("rowId", rowId);
                         feedDetail.putExtras(bundle);
                         startActivity(feedDetail);
                     }else {
 
-                        ConnectionTest.showToastForDuration(getContext(), getString(R.string.offline_text), 5000,
+                        ConnectionTest.showToastForDuration(getApplicationContext(), getString(R.string.offline_text), 5000,
                                 Gravity.CENTER);
                     }
                 }
@@ -163,46 +162,42 @@ public class FavouriteListActivityFragment extends Fragment implements LoaderMan
             return vh;
         }
 
-        private LayoutInflater getLayoutInflater() {
-            return null;
-        }
-
         @Override
-        public void onBindViewHolder(final FavouriteListActivityFragment.ViewHolder holder, int position) {
+        public void onBindViewHolder(final ViewHolder holder, int position) {
             mCursor.moveToPosition(position);
             holder.titleView.setText(mCursor.getString(MyLoader.Query.COLUMN_TITLE));
 
             holder.pubDate.setText(mCursor.getString(MyLoader.Query.COLUMN_PUB_DATE));
-          //  holder.description.setText(mCursor.getString(MyLoader.Query.COLUMN_DESC));
-            final String favourite = mCursor.getString(MyLoader.Query.COLUMN_FAV);
+            // holder.description.setText(mCursor.getString(MyLoader.Query.COLUMN_DESC));
+      //      final String favourite = mCursor.getString(MyLoader.Query.COLUMN_FAV);
 
 
 
-            Glide.with(holder.thumbnailView.getContext()).load(mCursor.getString(
-                    MyLoader.Query.COLUMN_PHOTO_URL))
-
-                    //load images as bitmaps to get fixed dimensions
-                    .asBitmap()
-
-                    //set a placeholder image
-                    .placeholder(R.drawable.cinema_new)
-
-                    //disable cache to avoid garbage collection that may produce crashes
-                    .diskCacheStrategy(DiskCacheStrategy.RESULT)
-                    .into(holder.thumbnailView);
+//            Glide.with(holder.thumbnailView.getContext()).load(mCursor.getString(
+//                    MyLoader.Query.COLUMN_PHOTO_URL))
+//
+//                    //load images as bitmaps to get fixed dimensions
+//                    .asBitmap()
+//
+//                    //set a placeholder image
+//                    .placeholder(R.drawable.cinema_new)
+//
+//                    //disable cache to avoid garbage collection that may produce crashes
+//                    .diskCacheStrategy(DiskCacheStrategy.RESULT)
+//                    .into(holder.thumbnailView);
             // mfav = Integer.valueOf(favourite);
+
+            Glide.with(context)
+                    .load(mCursor.getString(mCursor.getColumnIndex(NewsContract.Entry.COLUMN_NAME_IMAGE_URL)))
+                    .error(R.drawable.cinema_new)
+                    .crossFade()
+                    .centerCrop()
+                    .into(holder.thumbnailView);
             newsId = mCursor.getInt(MyLoader.Query.COLUMN_ID);
 
         }
 
-//        private void saveOrRemoveFavourite()
-//        {
-//            ContentValues contentValues = new ContentValues();
-//            contentValues.put(NewsContract.Entry.COLUMN_NAME_FAV, mfav);
-//            Uri uri = Uri.parse(NewsContract.Entry.CONTENT_URI + "/" + newsId);
-//            getContentResolver().update(uri, contentValues, null, null);
-//
-//        }
+
 
         @Override
         public int getItemCount() {
@@ -216,20 +211,18 @@ public class FavouriteListActivityFragment extends Fragment implements LoaderMan
         public ImageView thumbnailView;
         public TextView titleView;
         // public String favourite;
-       // public TextView description;
+        // public TextView description;
         public TextView pubDate;
 
 
         public ViewHolder(View view) {
             super(view);
-            thumbnailView = (ImageView) view.findViewById(R.id.card_image);
-            titleView = (TextView) view.findViewById(R.id.card_title);
-        //    description =(TextView) view.findViewById(R.id.card_subtitle);
-            pubDate = (TextView) view.findViewById(R.id.card_summary);
+            thumbnailView = (ImageView) view.findViewById(R.id.news_image);
+            titleView = (TextView) view.findViewById(R.id.news_title);
+            // description =(TextView) view.findViewById(R.id.card_subtitle);
+            pubDate = (TextView) view.findViewById(R.id.news_date);
 
 
         }
     }
-
-
 }

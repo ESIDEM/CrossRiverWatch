@@ -324,6 +324,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         values.put(NewsContract.Entry.COLUMN_NAME_LINK, entry.getLink());
         values.put(NewsContract.Entry.COLUMN_NAME_DESCRIPTION, entry.getDescription());
         values.put(NewsContract.Entry.COLUMN_NAME_IMAGE_URL, entry.getImageUrl());
+        values.put(NewsContract.Entry.COLUMN_NAME_FAV, 0);
         values.put(NewsContract.Entry.COLUMN_NAME_PUBLISHED, entry.getPubDate());
 
 

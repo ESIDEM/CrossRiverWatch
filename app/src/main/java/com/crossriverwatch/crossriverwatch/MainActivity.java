@@ -146,6 +146,9 @@ public class MainActivity extends AppCompatActivity
 
         } else if (id == R.id.nav_interview) {
 
+        }else if (id == R.id.nav_favourite){
+            Intent intent = new Intent(this,Favourites.class);
+            startActivity(intent);
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -290,6 +293,7 @@ public class MainActivity extends AppCompatActivity
                         Intent feedDetail = new Intent(getApplicationContext(), NewsDetailActivity.class);
                         Bundle bundle = new Bundle();
                         bundle.putLong("rowId", rowId);
+
                         feedDetail.putExtras(bundle);
                         startActivity(feedDetail);
                     }else {

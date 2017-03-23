@@ -11,7 +11,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class NewsDbHelper extends SQLiteOpenHelper {
 
     /** Schema version. */
-    public static final int DATABASE_VERSION = 1;
+    public static final int DATABASE_VERSION = 2;
     /** Filename for SQLite file. */
     public static final String DATABASE_NAME = "feed.db";
 
@@ -24,7 +24,7 @@ public class NewsDbHelper extends SQLiteOpenHelper {
                     NewsContract.Entry._ID + " INTEGER PRIMARY KEY," +
                     NewsContract.Entry.COLUMN_NAME_TITLE    + TYPE_TEXT + COMMA_SEP +
                     NewsContract.Entry.COLUMN_NAME_LINK + TYPE_TEXT + COMMA_SEP +
-                    NewsContract.Entry.COLUMN_NAME_FAV + TYPE_TEXT + COMMA_SEP +
+                    NewsContract.Entry.COLUMN_NAME_FAV + TYPE_INTEGER + COMMA_SEP +
                     NewsContract.Entry.COLUMN_NAME_PUBLISHED + TYPE_INTEGER +COMMA_SEP +
                     NewsContract.Entry.COLUMN_NAME_DESCRIPTION + TYPE_TEXT + COMMA_SEP +
 

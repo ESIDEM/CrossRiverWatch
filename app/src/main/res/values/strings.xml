@@ -37,4 +37,6 @@
     <string name="progress_dialogue">Please Wait.. </string>
     <string name="title_activity_favourite_list">FavouriteListActivity</string>
     <string name="no_favourite_news">Please add some News to your Favourite List.</string>
+    <string name="movie_item_btn_favorite_desc">Save to favorites</string>
+    <string name="title_activity_favourites">Favourites</string>
 </resources>

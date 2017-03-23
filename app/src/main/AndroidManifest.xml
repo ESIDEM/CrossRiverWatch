@@ -68,8 +68,8 @@
                 android:value="com.crossriverwatch.crossriverwatch.MainActivity" />
         </activity>
         <activity
-            android:name=".FavouriteListActivity"
-            android:label="@string/title_activity_favourite_list"
+            android:name=".Favourites"
+            android:label="@string/title_activity_favourites"
             android:parentActivityName=".MainActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
