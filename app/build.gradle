@@ -40,5 +40,6 @@ dependencies {
     compile 'com.github.sharish:ShimmerRecyclerView:v1.0'
     compile 'com.rom4ek:arcnavigationview:1.0.2'
     compile 'org.jsoup:jsoup:1.10.1'
+    compile 'uk.co.chrisjenx:calligraphy:2.2.0'
     testCompile 'junit:junit:4.12'
 }
