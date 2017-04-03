@@ -73,7 +73,7 @@ public class MainActivity extends AppCompatActivity
 
         setSupportActionBar(toolbar);
         
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        getSupportActionBar().setDisplayShowTitleEnabled(true);
 
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
