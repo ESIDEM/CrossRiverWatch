@@ -187,7 +187,7 @@ public class Favourites extends AppCompatActivity implements LoaderManager.Loade
 //                    .into(holder.thumbnailView);
             // mfav = Integer.valueOf(favourite);
 
-            Glide.with(context)
+            Glide.with(getApplicationContext())
                     .load(mCursor.getString(mCursor.getColumnIndex(NewsContract.Entry.COLUMN_NAME_IMAGE_URL)))
                     .error(R.drawable.cinema_new)
                     .crossFade()

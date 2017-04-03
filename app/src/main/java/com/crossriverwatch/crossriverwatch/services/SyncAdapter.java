@@ -354,82 +354,94 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         @Override
         protected Void doInBackground(Void... voids) {
 
-            String url = Config.NEW_URL;
+            for (int page = 1 ; page <= 6 ; page++){
+                loadNews(page);
 
-            JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
-                    new Response.Listener<JSONObject>() {
-                        @Override
-                        public void onResponse(JSONObject jsonObject) {
-
-
-                            // Parse JSON data
-                            postItems.addAll(JSONParser.parsePosts(jsonObject));
-
-                            // A temporary workaround to avoid downloading duplicate posts in some
-                            // rare circumstances by converting ArrayList to a LinkedHashSet without
-                            // losing its order
-                            Set<Post> set = new LinkedHashSet<>(postItems);
-                            postItems.clear();
-                            postItems.addAll(new ArrayList<>(set));
-
-                            for(Post item : postItems){
+            }
 
 
 
 
-                                ContentValues contentValues = new ContentValues();
-                                contentValues.put(NewsContract.Entry.COLUMN_NAME_TITLE, item.getTitle());
-                                contentValues.put(NewsContract.Entry.COLUMN_NAME_LINK, item.getUrl());
-                                contentValues.put(NewsContract.Entry.COLUMN_NAME_DESCRIPTION, item.getContent());
-                                contentValues.put(NewsContract.Entry.COLUMN_NAME_FAV, 0);
-                                contentValues.put(NewsContract.Entry.COLUMN_NAME_PUBLISHED, item.getDate());
-                                contentValues.put(NewsContract.Entry.COLUMN_NAME_IMAGE_URL, item.getFeaturedImageUrl());
 
-                                String select = "("+ NewsContract.Entry.COLUMN_NAME_TITLE+ " = ? )";
-                                Uri dirUri = NewsContract.Entry.buildDirUri();
-                                Cursor check = mContentResolver.query(dirUri,new String[]{ NewsContract.Entry.COLUMN_NAME_TITLE},
-                                        select,new String[]{item.getTitle()},null,null);
-                                check.moveToFirst();
-                                if(check.getCount() > 0) {
-                                    int columIndex = check.getColumnIndex(NewsContract.Entry.COLUMN_NAME_TITLE);
-                                    if (item.getTitle().compareTo(check.getString(columIndex)) == 1 ) {
-                                        insertEntry(item);
-                                    }
-                                }else{
+                return null;
+            }
+
+
+
+
+
+    }
+
+    private void loadNews(int page){
+
+        // String url = Config.BASE_URL;
+        String url = Config.BASE_URL + "?json=get_posts&page=" + String.valueOf(page);
+
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject jsonObject) {
+
+
+                        // Parse JSON data
+                        postItems.addAll(JSONParser.parsePosts(jsonObject));
+
+                        // A temporary workaround to avoid downloading duplicate posts in some
+                        // rare circumstances by converting ArrayList to a LinkedHashSet without
+                        // losing its order
+                        Set<Post> set = new LinkedHashSet<>(postItems);
+                        postItems.clear();
+                        postItems.addAll(new ArrayList<>(set));
+
+                        for (Post item : postItems) {
+
+
+                            ContentValues contentValues = new ContentValues();
+                            contentValues.put(NewsContract.Entry.COLUMN_NAME_TITLE, item.getTitle());
+                            contentValues.put(NewsContract.Entry.COLUMN_NAME_LINK, item.getUrl());
+                            contentValues.put(NewsContract.Entry.COLUMN_NAME_DESCRIPTION, item.getContent());
+                            contentValues.put(NewsContract.Entry.COLUMN_NAME_FAV, 0);
+                            contentValues.put(NewsContract.Entry.COLUMN_NAME_PUBLISHED, item.getDate());
+                            contentValues.put(NewsContract.Entry.COLUMN_NAME_IMAGE_URL, item.getFeaturedImageUrl());
+
+                            String select = "(" + NewsContract.Entry.COLUMN_NAME_TITLE + " = ? )";
+                            Uri dirUri = NewsContract.Entry.buildDirUri();
+                            Cursor check = mContentResolver.query(dirUri, new String[]{NewsContract.Entry.COLUMN_NAME_TITLE},
+                                    select, new String[]{item.getTitle()}, null, null);
+                            check.moveToFirst();
+                            if (check.getCount() > 0) {
+                                int columIndex = check.getColumnIndex(NewsContract.Entry.COLUMN_NAME_TITLE);
+                                if (item.getTitle().compareTo(check.getString(columIndex)) == 1) {
                                     insertEntry(item);
                                 }
-                                check.close();
+                            } else {
+                                insertEntry(item);
                             }
-
-
-
-
-
+                            check.close();
                         }
-                    },
-                    new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError volleyError) {
 
 
-                            volleyError.printStackTrace();
-                            Log.d(LOG_TAG, "----- Error: " + volleyError.getMessage());
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError volleyError) {
 
 
-                        }
-                    });
+                        volleyError.printStackTrace();
+                        Log.d(LOG_TAG, "----- Error: " + volleyError.getMessage());
 
 
-            request.setRetryPolicy(new DefaultRetryPolicy(10000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-
-            AppController.getInstance().addToRequestQueue(request, LOG_TAG);
-           // rssItems = rssParser.parse();
+                    }
+                });
 
 
+        request.setRetryPolicy(new DefaultRetryPolicy(10000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
 
-            return null;
-        }
+        AppController.getInstance().addToRequestQueue(request, LOG_TAG);
+        // rssItems = rssParser.parse();
+
     }
 }
 
