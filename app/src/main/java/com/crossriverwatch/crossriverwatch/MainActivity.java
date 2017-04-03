@@ -38,6 +38,8 @@ import com.crossriverwatch.crossriverwatch.services.SyncUtils;
 import com.crossriverwatch.crossriverwatch.utility.ConnectionTest;
 
 
+import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
+
 import static android.R.attr.description;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
@@ -57,7 +59,10 @@ public class MainActivity extends AppCompatActivity
     boolean isConnected;
     RecyclerView.LayoutManager layoutManager;
 
-
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
+    }
 
 
     @Override

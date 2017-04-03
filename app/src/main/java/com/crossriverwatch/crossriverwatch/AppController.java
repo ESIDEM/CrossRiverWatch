@@ -7,6 +7,8 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 
+import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
+
 /**
  * Created by ESIDEM jnr on 4/3/2017.
  */
@@ -23,7 +25,14 @@ public class AppController extends Application {
     public void onCreate() {
         super.onCreate();
         mInstance = this;
-    }
+
+            //Getting a reference to the font file
+        CalligraphyConfig.initDefault(new CalligraphyConfig.Builder()
+                .setDefaultFontPath("fonts/Lato-Regular.ttf")
+                .setFontAttrId(R.attr.fontPath)
+                .build()
+        );}
+
 
     public static synchronized AppController getInstance() {
         return mInstance;
