@@ -1,5 +1,6 @@
 package com.crossriverwatch.crossriverwatch;
 
+import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -46,6 +47,7 @@ import org.jsoup.nodes.Document;
 
 import java.io.IOException;
 
+import static android.R.attr.author;
 
 
 public class NewsDetailActivity extends AppCompatActivity {
@@ -55,6 +57,7 @@ public class NewsDetailActivity extends AppCompatActivity {
     private TextView title_textView;
     //private TextView detailsView;
     private Context context;
+    private String dateNews;
     public String url;
     private String photoUrl;
     private ImageView detailImage;
@@ -71,12 +74,14 @@ public class NewsDetailActivity extends AppCompatActivity {
     private final String encoding = "utf-8";
     private final String history = null;
 
+    Document doc;
+
 
 
     private CollapsingToolbarLayout collapsingToolbarLayout;
 
 
-    @SuppressWarnings("ConstantConditions")
+    @SuppressLint("SetJavaScriptEnabled")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -114,8 +119,8 @@ public class NewsDetailActivity extends AppCompatActivity {
         detailImage = (ImageView) findViewById(R.id.image_view);
         webView = (WebView) findViewById(R.id.webView);
         // webView = new WebViewHelper().webview(this);
-        WebSettings ws = webView.getSettings();
-        ws.setJavaScriptEnabled(true);
+       // WebSettings ws = webView.getSettings();
+       // ws.setJavaScriptEnabled(true);
 
         getNewsDetail();
 
@@ -146,7 +151,7 @@ public class NewsDetailActivity extends AppCompatActivity {
         collapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
         collapsingToolbarLayout.setTitle(title);
         collapsingToolbarLayout.setExpandedTitleColor(getResources().getColor(android.R.color.transparent));
-        new FetchDetails().execute();
+       // new FetchDetails().execute();
 
         Picasso.with(this).load(photoUrl).into(detailImage, new Callback() {
             @Override
@@ -171,8 +176,38 @@ public class NewsDetailActivity extends AppCompatActivity {
         // Load actual article content async, after the view is drawn
         // webView.loadDataWithBaseURL(base, getCleanContent(), mime, encoding, history);
 
+//        webView.setWebChromeClient(new WebChromeClient());
+//
+//        webView.setWebViewClient(new WebViewClient() {
+//            @Override
+//            public void onPageStarted(WebView view, String url, Bitmap favicon) {
+//                super.onPageStarted(view, url, favicon);
+//
+//
+//
+//            }
+//
+//            @Override
+//            public void onPageFinished(WebView view, String url) {
+//                super.onPageFinished(view, url);
+//                progressDialog.dismiss();
+//            }
+//
+//            @Override
+//            public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
+//                super.onReceivedError(view, request, error);
+//                Toast.makeText(getApplicationContext(), "Cannot load page", Toast.LENGTH_SHORT).show();
+//                progressDialog.dismiss();
+//            }
+//        });
+//
+//        webView.loadUrl(url);
+
+
 
     }
+
+
 
 
     @Override
@@ -261,6 +296,7 @@ public class NewsDetailActivity extends AppCompatActivity {
                 NewsContract.Entry.COLUMN_NAME_TITLE,
                 NewsContract.Entry.COLUMN_NAME_LINK,
                 NewsContract.Entry.COLUMN_NAME_IMAGE_URL,
+                NewsContract.Entry.COLUMN_NAME_PUBLISHED,
                 NewsContract.Entry.COLUMN_NAME_FAV,
                 NewsContract.Entry.COLUMN_NAME_DESCRIPTION};
 
@@ -273,20 +309,40 @@ public class NewsDetailActivity extends AppCompatActivity {
             String mTitle = cursor.getString(cursor.getColumnIndexOrThrow(NewsContract.Entry.COLUMN_NAME_TITLE));
             String mUrl = cursor.getString(cursor.getColumnIndexOrThrow(NewsContract.Entry.COLUMN_NAME_LINK));
             String imageUrl = cursor.getString(cursor.getColumnIndexOrThrow(NewsContract.Entry.COLUMN_NAME_IMAGE_URL));
-            String detals = cursor.getString(cursor.getColumnIndexOrThrow(NewsContract.Entry.COLUMN_NAME_DESCRIPTION));
+            String details = cursor.getString(cursor.getColumnIndexOrThrow(NewsContract.Entry.COLUMN_NAME_DESCRIPTION));
             int favourite = Integer.valueOf(cursor.getString(cursor.getColumnIndexOrThrow(NewsContract.Entry.COLUMN_NAME_FAV)));
+            String newsDate = cursor.getString(cursor.getColumnIndexOrThrow(NewsContract.Entry.COLUMN_NAME_PUBLISHED));
 
             title = mTitle;
             url = mUrl;
             photoUrl = imageUrl;
-            detailStr = detals;
+            detailStr = details;
             mFav = favourite;
+            dateNews = newsDate;
 
             if(mFav == 1) {
                 mFab.setImageResource(R.drawable.ic_action_action_favorite);
             }else{
                 mFab.setImageResource(R.drawable.ic_action_action_favorite_outline);
             }
+
+            webView.loadData("", "text/html; charset=UTF-8", null);
+
+            String html = "<style>img{max-width:100%;height:auto;} " +
+                    "iframe{width:100%;}</style> ";
+            // Article Title
+            html += "<h2>" + title + "</h2> ";
+            // Date & author
+            html += "<h4>" + dateNews + " " + author + "</h4>";
+            // The actual content
+            html += detailStr;
+
+            webView.getSettings().setJavaScriptEnabled(true);
+            webView.setWebChromeClient(new WebChromeClient());
+
+            // Load and display HTML content
+            // Use "charset=UTF-8" to support non-English language
+            webView.loadData(html, "text/html; charset=UTF-8", null);
 
 
         }
@@ -308,97 +364,118 @@ public class NewsDetailActivity extends AppCompatActivity {
 
 
 
-    private class FetchDetails extends AsyncTask<Document, Void, Document> {
-
-        @Override
-        protected void onPreExecute() {
-
-            progressDialog.show();
-            super.onPreExecute();
-        }
-
-        @Override
-        protected Document doInBackground(Document... documents) {
-
-            Document document = null;
-            try {
-                document = Jsoup.connect(url.toString()).
-                        userAgent("Mozilla/5.0 (Windows NT 5.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.110 Safari/537.36").get();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            if(document!=null){
-            document.getElementsByClass("breaking-news").remove();
-            document.getElementsByClass("category-title").remove();
-            document.getElementsByClass("short-link").remove();
-            document.getElementsByClass("sidebar main-sidebar").remove();
-            document.getElementsByClass("mom-social-share ss-horizontal border-box").remove();
-            document.getElementsByClass("addtoany_share_save_container addtoany_content_top").remove();
-            document.getElementsByClass("addtoany_share_save_container addtoany_content_bottom").remove();
-            document.getElementsByClass("copyrights-area").remove();
-            document.getElementsByClass("np-posts").remove();
-            document.getElementsByClass("post-tags").remove();
-            document.getElementsByClass("mom-e3lanat-wrap").remove();
-            document.getElementsByClass("short-link").remove();
-            document.getElementsByClass("single-title").remove();
-            document.getElementsByClass("base-box single-box about-the-author").remove();
-            document.getElementsByClass("base-box single-box").remove();
-            //document.getElementsByClass("short-link").remove();
-            //document.getElementsByClass("short-link").remove();
-            //document.getElementsByClass("short-link").remove();
-            //document.getElementsByClass("short-link").remove();
-            document.getElementById("header-wrapper").remove();
-            document.getElementById("navigation").remove();
-            document.getElementById("footer").remove();
-            return document;
-        }
-        return null;
-        }
-
-
-        @Override
-        protected void onPostExecute(Document document) {
-
-            if(document!=null) {
-
-                webView.setWebChromeClient(new WebChromeClient());
-
-                webView.setWebViewClient(new WebViewClient() {
-                    @Override
-                    public void onPageStarted(WebView view, String url, Bitmap favicon) {
-                        super.onPageStarted(view, url, favicon);
-
-
-
-                    }
-
-                    @Override
-                    public void onPageFinished(WebView view, String url) {
-                        super.onPageFinished(view, url);
-                        progressDialog.dismiss();
-                    }
-
-                    @Override
-                    public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
-                        super.onReceivedError(view, request, error);
-                        Toast.makeText(getApplicationContext(), "Cannot load page", Toast.LENGTH_SHORT).show();
-                        progressDialog.dismiss();
-                    }
-                });
-
-                webView.loadDataWithBaseURL(base, document.toString(), "text/html", "utf-8", "");
-
-               // progressDialog.dismiss();
-            }else {
-
-                Toast.makeText(getApplicationContext(),"Unable to load News details ", Toast.LENGTH_LONG).show();
-
-                progressDialog.dismiss();
-            }
-            super.onPostExecute(document);
-        }
-    }
+//    private class FetchDetails extends AsyncTask<Document, Void, Document> {
+//
+//        String mYUrl;
+//
+//        @Override
+//        protected void onPreExecute() {
+//
+//            String[] projection = {
+//                    NewsContract.Entry._ID,
+//
+//                    NewsContract.Entry.COLUMN_NAME_LINK,
+//                    };
+//            Uri uri = Uri.parse(NewsContract.Entry.CONTENT_URI + "/" + id);
+//            ContentResolver resolver = getApplicationContext().getContentResolver();
+//            Cursor cursor = resolver.query(uri, projection, null, null,
+//                    null);
+//            if (cursor != null) {
+//                cursor.moveToFirst();
+//
+//                String mUrl = cursor.getString(cursor.getColumnIndexOrThrow(NewsContract.Entry.COLUMN_NAME_LINK));
+//
+//                mYUrl = mUrl;
+//
+//            }
+//
+//
+//            progressDialog.show();
+//            super.onPreExecute();
+//        }
+//
+//        @Override
+//        protected Document doInBackground(Document... documents) {
+//
+//            Document document = null;
+//            try {
+//                document = Jsoup.connect(mYUrl.toString()).get();
+//
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//
+//            if(document!=null){
+//            document.getElementsByClass("breaking-news").remove();
+//            document.getElementsByClass("category-title").remove();
+//            document.getElementsByClass("short-link").remove();
+//            document.getElementsByClass("sidebar main-sidebar").remove();
+//            document.getElementsByClass("mom-social-share ss-horizontal border-box").remove();
+//            document.getElementsByClass("addtoany_share_save_container addtoany_content_top").remove();
+//            document.getElementsByClass("addtoany_share_save_container addtoany_content_bottom").remove();
+//            document.getElementsByClass("copyrights-area").remove();
+//            document.getElementsByClass("np-posts").remove();
+//            document.getElementsByClass("post-tags").remove();
+//            document.getElementsByClass("mom-e3lanat-wrap").remove();
+//            document.getElementsByClass("short-link").remove();
+//            document.getElementsByClass("single-title").remove();
+//            document.getElementsByClass("base-box single-box about-the-author").remove();
+//            document.getElementsByClass("base-box single-box").remove();
+//            //document.getElementsByClass("short-link").remove();
+//            //document.getElementsByClass("short-link").remove();
+//            //document.getElementsByClass("short-link").remove();
+//            //document.getElementsByClass("short-link").remove();
+//            document.getElementById("header-wrapper").remove();
+//            document.getElementById("navigation").remove();
+//            document.getElementById("footer").remove();
+//            return document;
+//        }
+//        return null;
+//        }
+//
+//
+//        @Override
+//        protected void onPostExecute(Document document) {
+//
+//            if(document!=null) {
+//
+//                webView.setWebChromeClient(new WebChromeClient());
+//
+//                webView.setWebViewClient(new WebViewClient() {
+//                    @Override
+//                    public void onPageStarted(WebView view, String url, Bitmap favicon) {
+//                        super.onPageStarted(view, url, favicon);
+//
+//
+//
+//                    }
+//
+//                    @Override
+//                    public void onPageFinished(WebView view, String url) {
+//                        super.onPageFinished(view, url);
+//                        progressDialog.dismiss();
+//                    }
+//
+//                    @Override
+//                    public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
+//                        super.onReceivedError(view, request, error);
+//                        Toast.makeText(getApplicationContext(), "Cannot load page", Toast.LENGTH_SHORT).show();
+//                        progressDialog.dismiss();
+//                    }
+//                });
+//
+//                webView.loadDataWithBaseURL(base, document.toString(), "text/html", "utf-8", "");
+//
+//               // progressDialog.dismiss();
+//            }else {
+//
+//                Toast.makeText(getApplicationContext(),"Unable to load News details ", Toast.LENGTH_LONG).show();
+//
+//                progressDialog.dismiss();
+//            }
+//            super.onPostExecute(document);
+//        }
+//    }
 
 
 }

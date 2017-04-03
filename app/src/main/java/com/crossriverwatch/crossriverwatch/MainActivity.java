@@ -296,6 +296,7 @@ public class MainActivity extends AppCompatActivity
 
                         feedDetail.putExtras(bundle);
                         startActivity(feedDetail);
+
                     }else {
 
                         ConnectionTest.showToastForDuration(getApplicationContext(), getString(R.string.offline_text), 5000,

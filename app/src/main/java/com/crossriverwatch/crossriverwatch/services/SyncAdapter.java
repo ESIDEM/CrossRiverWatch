@@ -12,20 +12,35 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
+import android.util.Log;
+import android.view.View;
 
 
-
-
+import com.android.volley.DefaultRetryPolicy;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.crossriverwatch.crossriverwatch.AppController;
+import com.crossriverwatch.crossriverwatch.R;
 import com.crossriverwatch.crossriverwatch.database.NewsContract;
+import com.crossriverwatch.crossriverwatch.parser.Config;
+import com.crossriverwatch.crossriverwatch.parser.JSONParser;
+import com.crossriverwatch.crossriverwatch.parser.Post;
 import com.crossriverwatch.crossriverwatch.parser.RSSItem;
 import com.crossriverwatch.crossriverwatch.parser.ReadRss;
+
+import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 
 /**
@@ -45,6 +60,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     ReadRss rssParser = new ReadRss();
 
     List<RSSItem> rssItems = new ArrayList<RSSItem>();
+
+    List<Post>postItems = new ArrayList<Post>();
 
 
     /**
@@ -312,7 +329,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 //    }
 
 
-    private void insertEntry(RSSItem entry) {
+    private void insertEntry(Post entry) {
 
 
 
@@ -321,11 +338,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         values.clear();
 
         values.put(NewsContract.Entry.COLUMN_NAME_TITLE, entry.getTitle());
-        values.put(NewsContract.Entry.COLUMN_NAME_LINK, entry.getLink());
-        values.put(NewsContract.Entry.COLUMN_NAME_DESCRIPTION, entry.getDescription());
-        values.put(NewsContract.Entry.COLUMN_NAME_IMAGE_URL, entry.getImageUrl());
+        values.put(NewsContract.Entry.COLUMN_NAME_LINK, entry.getUrl());
+        values.put(NewsContract.Entry.COLUMN_NAME_DESCRIPTION, entry.getContent());
+        values.put(NewsContract.Entry.COLUMN_NAME_IMAGE_URL, entry.getFeaturedImageUrl());
         values.put(NewsContract.Entry.COLUMN_NAME_FAV, 0);
-        values.put(NewsContract.Entry.COLUMN_NAME_PUBLISHED, entry.getPubDate());
+        values.put(NewsContract.Entry.COLUMN_NAME_PUBLISHED, entry.getDate());
 
 
         mContentResolver.insert(NewsContract.Entry.CONTENT_URI, values);
@@ -337,35 +354,78 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         @Override
         protected Void doInBackground(Void... voids) {
 
-            rssItems = rssParser.parse();
-            for(RSSItem item : rssItems){
+            String url = Config.NEW_URL;
+
+            JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
+                    new Response.Listener<JSONObject>() {
+                        @Override
+                        public void onResponse(JSONObject jsonObject) {
+
+
+                            // Parse JSON data
+                            postItems.addAll(JSONParser.parsePosts(jsonObject));
+
+                            // A temporary workaround to avoid downloading duplicate posts in some
+                            // rare circumstances by converting ArrayList to a LinkedHashSet without
+                            // losing its order
+                            Set<Post> set = new LinkedHashSet<>(postItems);
+                            postItems.clear();
+                            postItems.addAll(new ArrayList<>(set));
+
+                            for(Post item : postItems){
 
 
 
 
-                ContentValues contentValues = new ContentValues();
-                contentValues.put(NewsContract.Entry.COLUMN_NAME_TITLE, item.getTitle());
-                contentValues.put(NewsContract.Entry.COLUMN_NAME_LINK, item.getLink());
-                contentValues.put(NewsContract.Entry.COLUMN_NAME_DESCRIPTION, item.getDescription());
-                contentValues.put(NewsContract.Entry.COLUMN_NAME_FAV, 0);
-                contentValues.put(NewsContract.Entry.COLUMN_NAME_PUBLISHED, item.getPubDate());
-                contentValues.put(NewsContract.Entry.COLUMN_NAME_IMAGE_URL, item.getImageUrl());
+                                ContentValues contentValues = new ContentValues();
+                                contentValues.put(NewsContract.Entry.COLUMN_NAME_TITLE, item.getTitle());
+                                contentValues.put(NewsContract.Entry.COLUMN_NAME_LINK, item.getUrl());
+                                contentValues.put(NewsContract.Entry.COLUMN_NAME_DESCRIPTION, item.getContent());
+                                contentValues.put(NewsContract.Entry.COLUMN_NAME_FAV, 0);
+                                contentValues.put(NewsContract.Entry.COLUMN_NAME_PUBLISHED, item.getDate());
+                                contentValues.put(NewsContract.Entry.COLUMN_NAME_IMAGE_URL, item.getFeaturedImageUrl());
 
-                String select = "("+ NewsContract.Entry.COLUMN_NAME_TITLE+ " = ? )";
-                Uri dirUri = NewsContract.Entry.buildDirUri();
-                Cursor check = mContentResolver.query(dirUri,new String[]{ NewsContract.Entry.COLUMN_NAME_TITLE},
-                        select,new String[]{item.getTitle()},null,null);
-                check.moveToFirst();
-                if(check.getCount() > 0) {
-                    int columIndex = check.getColumnIndex(NewsContract.Entry.COLUMN_NAME_TITLE);
-                    if (item.getTitle().compareTo(check.getString(columIndex)) == 1 ) {
-                        insertEntry(item);
-                    }
-                }else{
-                    insertEntry(item);
-                }
-                check.close();
-            }
+                                String select = "("+ NewsContract.Entry.COLUMN_NAME_TITLE+ " = ? )";
+                                Uri dirUri = NewsContract.Entry.buildDirUri();
+                                Cursor check = mContentResolver.query(dirUri,new String[]{ NewsContract.Entry.COLUMN_NAME_TITLE},
+                                        select,new String[]{item.getTitle()},null,null);
+                                check.moveToFirst();
+                                if(check.getCount() > 0) {
+                                    int columIndex = check.getColumnIndex(NewsContract.Entry.COLUMN_NAME_TITLE);
+                                    if (item.getTitle().compareTo(check.getString(columIndex)) == 1 ) {
+                                        insertEntry(item);
+                                    }
+                                }else{
+                                    insertEntry(item);
+                                }
+                                check.close();
+                            }
+
+
+
+
+
+                        }
+                    },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError volleyError) {
+
+
+                            volleyError.printStackTrace();
+                            Log.d(LOG_TAG, "----- Error: " + volleyError.getMessage());
+
+
+                        }
+                    });
+
+
+            request.setRetryPolicy(new DefaultRetryPolicy(10000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+
+            AppController.getInstance().addToRequestQueue(request, LOG_TAG);
+           // rssItems = rssParser.parse();
+
 
 
             return null;
