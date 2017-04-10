@@ -9,12 +9,12 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.SyncResult;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.design.widget.Snackbar;
+
 import android.util.Log;
-import android.view.View;
 
 
 import com.android.volley.DefaultRetryPolicy;
@@ -23,8 +23,9 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.crossriverwatch.crossriverwatch.AppController;
-import com.crossriverwatch.crossriverwatch.R;
+
 import com.crossriverwatch.crossriverwatch.database.NewsContract;
+
 import com.crossriverwatch.crossriverwatch.parser.Config;
 import com.crossriverwatch.crossriverwatch.parser.JSONParser;
 import com.crossriverwatch.crossriverwatch.parser.Post;
@@ -33,14 +34,16 @@ import com.crossriverwatch.crossriverwatch.parser.ReadRss;
 
 import org.json.JSONObject;
 
-import java.text.SimpleDateFormat;
+
 import java.util.ArrayList;
-import java.util.Date;
+
 
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Locale;
+
 import java.util.Set;
+
+import static android.R.id.list;
 
 
 /**
@@ -48,6 +51,9 @@ import java.util.Set;
  */
 
 public class SyncAdapter extends AbstractThreadedSyncAdapter {
+
+
+
 
     private final static String LOG_TAG = "SyncAdapter";
     // Global variables
@@ -62,6 +68,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     List<RSSItem> rssItems = new ArrayList<RSSItem>();
 
     List<Post>postItems = new ArrayList<Post>();
+
 
 
     /**
@@ -343,6 +350,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         values.put(NewsContract.Entry.COLUMN_NAME_IMAGE_URL, entry.getFeaturedImageUrl());
         values.put(NewsContract.Entry.COLUMN_NAME_FAV, 0);
         values.put(NewsContract.Entry.COLUMN_NAME_PUBLISHED, entry.getDate());
+       // values.put(NewsContract.Entry.COLUMN_NAME_CATEGORIES, changeToString(entry.getCategories()));
+
 
 
         mContentResolver.insert(NewsContract.Entry.CONTENT_URI, values);
@@ -354,10 +363,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         @Override
         protected Void doInBackground(Void... voids) {
 
-            for (int page = 1 ; page <= 6 ; page++){
+            for (int page = 1 ; page <=5 ; page++){
                 loadNews(page);
 
-            }
+           }
 
 
 
@@ -374,8 +383,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     private void loadNews(int page){
 
-        // String url = Config.BASE_URL;
-        String url = Config.BASE_URL + "?json=get_posts&page=" + String.valueOf(page);
+        // String url = Config.NEW_URL;
+        String url = ((AppController) getContext().getApplicationContext()).getBASE_URL()  + String.valueOf(page);
+
 
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {
@@ -396,6 +406,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                         for (Post item : postItems) {
 
 
+
                             ContentValues contentValues = new ContentValues();
                             contentValues.put(NewsContract.Entry.COLUMN_NAME_TITLE, item.getTitle());
                             contentValues.put(NewsContract.Entry.COLUMN_NAME_LINK, item.getUrl());
@@ -403,6 +414,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             contentValues.put(NewsContract.Entry.COLUMN_NAME_FAV, 0);
                             contentValues.put(NewsContract.Entry.COLUMN_NAME_PUBLISHED, item.getDate());
                             contentValues.put(NewsContract.Entry.COLUMN_NAME_IMAGE_URL, item.getFeaturedImageUrl());
+                           // contentValues.put(NewsContract.Entry.COLUMN_NAME_CATEGORIES, changeToString(item.getCategories()));
+
 
                             String select = "(" + NewsContract.Entry.COLUMN_NAME_TITLE + " = ? )";
                             Uri dirUri = NewsContract.Entry.buildDirUri();
@@ -439,9 +452,37 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         request.setRetryPolicy(new DefaultRetryPolicy(10000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
                 DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
 
+
         AppController.getInstance().addToRequestQueue(request, LOG_TAG);
+        AppController.getInstance().getRequestQueue().getCache().clear();
         // rssItems = rssParser.parse();
 
+    }
+
+    public static String strSeparator = "__,__";
+    public static String convertArrayToString(String[] array){
+        String str = "";
+        for (int i = 0;i<array.length; i++) {
+            str = str+array[i];
+            // Do not append comma at the end of last element
+            if(i<array.length-1){
+                str = str+strSeparator;
+            }
+        }
+        return str;
+    }
+
+
+   String changeToString(ArrayList<String> list){
+
+       String listString = "";
+
+       for (String s : list)
+       {
+           listString += s + " ";
+       }
+
+       return listString;
     }
 }
 

@@ -22,7 +22,7 @@
             android:layout_height="match_parent"
             tools:src="@drawable/cinema_new"
             android:scaleType="centerCrop"
-            android:paddingRight="16dp"
+            android:paddingRight="20dp"
             android:contentDescription="@string/image_dec"
             android:textAppearance="?attr/textAppearanceListItem" />
 

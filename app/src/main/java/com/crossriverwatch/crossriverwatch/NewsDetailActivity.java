@@ -11,41 +11,34 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
-import android.os.AsyncTask;
+
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
+
 
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.transition.Slide;
-import android.util.Log;
+
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.support.v7.graphics.Palette;
 
 import android.webkit.WebChromeClient;
-import android.webkit.WebResourceError;
-import android.webkit.WebResourceRequest;
-import android.webkit.WebSettings;
 import android.webkit.WebView;
-import android.webkit.WebViewClient;
+
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.crossriverwatch.crossriverwatch.database.NewsContract;
-import com.crossriverwatch.crossriverwatch.database.NewsProvider;
+
+import com.crossriverwatch.crossriverwatch.utility.ShareUtils;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
-
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-
-import java.io.IOException;
 
 import static android.R.attr.author;
 
@@ -74,14 +67,13 @@ public class NewsDetailActivity extends AppCompatActivity {
     private final String encoding = "utf-8";
     private final String history = null;
 
-    Document doc;
+
 
 
 
     private CollapsingToolbarLayout collapsingToolbarLayout;
 
 
-    @SuppressLint("SetJavaScriptEnabled")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -97,8 +89,7 @@ public class NewsDetailActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                shareNews();
             }
         });
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -333,7 +324,7 @@ public class NewsDetailActivity extends AppCompatActivity {
             // Article Title
             html += "<h2>" + title + "</h2> ";
             // Date & author
-            html += "<h4>" + dateNews + " " + author + "</h4>";
+            html += "<h4>" + dateNews + " " + "</h4>";
             // The actual content
             html += detailStr;
 
@@ -476,6 +467,17 @@ public class NewsDetailActivity extends AppCompatActivity {
 //            super.onPostExecute(document);
 //        }
 //    }
+
+    private void shareNews() {
+
+
+
+
+        String message =  title +", " + url;
+
+        ShareUtils.shareCustom(message, this);
+
+    }
 
 
 }

@@ -34,6 +34,7 @@ public class MyLoader extends CursorLoader {
                 NewsContract.Entry.COLUMN_NAME_DESCRIPTION,
                 NewsContract.Entry.COLUMN_NAME_IMAGE_URL,
                 NewsContract.Entry.COLUMN_NAME_FAV,
+
         };
 
         int COLUMN_ID = 0;
@@ -43,5 +44,6 @@ public class MyLoader extends CursorLoader {
         int COLUMN_DESC = 4;
         int COLUMN_PHOTO_URL = 5;
         int COLUMN_FAV = 6;
+
     }
 }

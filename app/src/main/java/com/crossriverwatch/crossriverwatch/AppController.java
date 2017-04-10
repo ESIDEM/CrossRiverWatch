@@ -34,16 +34,21 @@ public class AppController extends Application {
             mRequestQueue = Volley.newRequestQueue(getApplicationContext());
         }
 
+        mRequestQueue.getCache().clear();
+
+
         return mRequestQueue;
     }
 
     public <T> void addToRequestQueue(Request<T> req, String tag) {
         req.setTag(TextUtils.isEmpty(tag) ? TAG : tag);
+        req.setShouldCache(false);
         getRequestQueue().add(req);
     }
 
     public <T> void addToRequestQueue(Request<T> req) {
         req.setTag(TAG);
+        req.setShouldCache(false);
         getRequestQueue().add(req);
     }
 
@@ -52,4 +57,16 @@ public class AppController extends Application {
             mRequestQueue.cancelAll(tag);
         }
     }
+
+    private String BASE_URL;
+
+    public String getBASE_URL() {
+        return BASE_URL;
+    }
+
+    public void setBASE_URL(String BASE_URL) {
+        this.BASE_URL = BASE_URL;
+    }
+
+
 }

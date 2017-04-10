@@ -23,6 +23,7 @@ public class NewsProvider extends ContentProvider {
 
     NewsDbHelper mDatabaseHelper;
 
+
     /**
      * Content authority for this provider.
      */
@@ -107,6 +108,8 @@ public class NewsProvider extends ContentProvider {
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
     }
+
+
 
     /**
      * Insert a new entry into the database.
