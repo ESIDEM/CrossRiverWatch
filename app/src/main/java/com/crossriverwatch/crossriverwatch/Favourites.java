@@ -1,13 +1,10 @@
 package com.crossriverwatch.crossriverwatch;
 
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -23,11 +20,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.cooltechworks.views.shimmer.ShimmerRecyclerView;
 import com.crossriverwatch.crossriverwatch.database.NewsContract;
 
 import com.crossriverwatch.crossriverwatch.utility.ConnectionTest;
+import com.crossriverwatch.crossriverwatch.utility.MyLoader;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;

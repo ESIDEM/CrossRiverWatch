@@ -1,4 +1,4 @@
-package com.crossriverwatch.crossriverwatch;
+package com.crossriverwatch.crossriverwatch.adapters;
 
 import android.content.Context;
 import android.content.Intent;
@@ -13,7 +13,9 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-
+import com.crossriverwatch.crossriverwatch.utility.MyLoader;
+import com.crossriverwatch.crossriverwatch.NewsDetailActivity;
+import com.crossriverwatch.crossriverwatch.R;
 
 
 /**

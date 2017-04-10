@@ -1,4 +1,4 @@
-package com.crossriverwatch.crossriverwatch;
+package com.crossriverwatch.crossriverwatch.adapters;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
@@ -9,6 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.crossriverwatch.crossriverwatch.R;
 import com.crossriverwatch.crossriverwatch.parser.Post;
 
 import java.util.ArrayList;

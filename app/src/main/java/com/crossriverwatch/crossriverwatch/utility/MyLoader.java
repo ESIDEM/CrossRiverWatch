@@ -1,4 +1,4 @@
-package com.crossriverwatch.crossriverwatch;
+package com.crossriverwatch.crossriverwatch.utility;
 
 import android.content.Context;
 import android.net.Uri;
