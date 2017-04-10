@@ -26,9 +26,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 
+import com.crossriverwatch.crossriverwatch.fragments.BusinessNews;
 
-import com.crossriverwatch.crossriverwatch.parser.Config;
-
+import com.crossriverwatch.crossriverwatch.fragments.RecentPost;
+import com.crossriverwatch.crossriverwatch.fragments.SportsNews;
 import com.crossriverwatch.crossriverwatch.services.SyncUtils;
 
 
@@ -152,64 +153,32 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (id == R.id.nav_latest) {
 
             fragmentClass = RecentPost.class;
-            //Config.BASE_URL =  "http://crossriverwatch.com/?json=get_posts&page=";
-
-           // ((AppController) this.getApplication()).setBASE_URL("http://crossriverwatch.com/?json=get_posts&page=");
-
-          //  mContentResolver.delete(NewsContract.Entry.CONTENT_URI,null,null);
 
 
-            // Handle the camera action
+
         } else if (id==R.id.nav_sport){
 
             fragmentClass = SportsNews.class;
-
-            //Config.BASE_URL =  "http://crossriverwatch.com/?json=get_category_posts&category_id=9&page=";
-           // ((AppController) this.getApplication()).setBASE_URL("http://crossriverwatch.com/?json=get_tag_posts&tag_slug=sports&page=");
-
-           // mContentResolver.delete(NewsContract.Entry.CONTENT_URI,null,null);
 
 
         }
         else if (id == R.id.nav_education) {
 
-            //Config.BASE_URL =  "http://crossriverwatch.com/?json=get_category_posts&category_id=4&page=";
-            ((AppController) this.getApplication()).setBASE_URL("http://crossriverwatch.com/?json=get_tag_posts&tag_slug=education&page=");
 
-
-          //  mContentResolver.delete(NewsContract.Entry.CONTENT_URI,null,null);
 
         } else if (id == R.id.nav_report) {
-
-            //Config.BASE_URL =  "http://crossriverwatch.com/?json=get_category_posts&category_id=5&page=";
-            ((AppController) this.getApplication()).setBASE_URL("http://crossriverwatch.com/?json=get_category_posts&category_id=5&page=");
-
-
-
-           // mContentResolver.delete(NewsContract.Entry.CONTENT_URI,null,null);
 
 
         } else if (id == R.id.nav_health) {
 
-            //Config.BASE_URL =  "http://crossriverwatch.com/?json=get_category_posts&category_id=397&page=";
-            ((AppController) this.getApplication()).setBASE_URL("http://crossriverwatch.com/?json=get_category_posts&category_id=397&page=");
-
-           // mContentResolver.delete(NewsContract.Entry.CONTENT_URI,null,null);
-
 
         } else if (id == R.id.nav_politics){
 
-          //  Config.BASE_URL =  "http://crossriverwatch.com/?json=get_category_posts&category_id=3&page=";
-           // ((Config) this.getApplication()).setBASE_URL("http://crossriverwatch.com/?json=get_category_posts&category_id=3&page=");
 
-           // mContentResolver.delete(NewsContract.Entry.CONTENT_URI,null,null);
 
         }else if( id == R.id.nav_entertainment){
 
-           // Config.BASE_URL =  "http://crossriverwatch.com/?json=get_category_posts&category_id=398&page=";
-            ((AppController) this.getApplication()).setBASE_URL("http://crossriverwatch.com/?json=get_category_posts&category_id=398&page=");
 
-           // mContentResolver.delete(NewsContract.Entry.CONTENT_URI,null,null);
 
         }else if (id == R.id.nav_business){
 

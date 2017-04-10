@@ -1,4 +1,4 @@
-package com.crossriverwatch.crossriverwatch;
+package com.crossriverwatch.crossriverwatch.fragments;
 
 
 import android.os.Bundle;
@@ -19,6 +19,9 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.crossriverwatch.crossriverwatch.AppController;
+import com.crossriverwatch.crossriverwatch.adapters.CategoryPostAdapter;
+import com.crossriverwatch.crossriverwatch.R;
 import com.crossriverwatch.crossriverwatch.parser.Config;
 import com.crossriverwatch.crossriverwatch.parser.JSONParser;
 import com.crossriverwatch.crossriverwatch.parser.Post;
