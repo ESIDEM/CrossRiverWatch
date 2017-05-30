@@ -9,5 +9,8 @@
     <color name="colorWhite">#FFFFFF</color>
     <color name="textPrimary">#212121</color>
     <color name="textSecondary">#8b8b8b</color>
+    <color name="blue">#1f44e7</color>
+
+
 
 </resources>

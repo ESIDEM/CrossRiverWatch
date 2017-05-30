@@ -1,20 +1,32 @@
 package com.crossriverwatch.crossriverwatch.services;
 
 import android.accounts.Account;
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.content.AbstractThreadedSyncAdapter;
 import android.content.ContentProviderClient;
 
 import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.SyncResult;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
+import android.preference.PreferenceManager;
+
+
+import android.provider.BaseColumns;
+import android.provider.ContactsContract;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
+
 
 
 import com.android.volley.DefaultRetryPolicy;
@@ -22,28 +34,33 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.crossriverwatch.crossriverwatch.AppController;
 
+import com.crossriverwatch.crossriverwatch.activities.MainActivity;
+import com.crossriverwatch.crossriverwatch.activities.NewsDetailActivity;
+import com.crossriverwatch.crossriverwatch.database.NewsProvider;
+import com.crossriverwatch.crossriverwatch.utility.AppController;
+
+import com.crossriverwatch.crossriverwatch.R;
 import com.crossriverwatch.crossriverwatch.database.NewsContract;
 
-import com.crossriverwatch.crossriverwatch.parser.Config;
 import com.crossriverwatch.crossriverwatch.parser.JSONParser;
 import com.crossriverwatch.crossriverwatch.parser.Post;
-import com.crossriverwatch.crossriverwatch.parser.RSSItem;
-import com.crossriverwatch.crossriverwatch.parser.ReadRss;
 
 import org.json.JSONObject;
 
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 
+import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.List;
 
+
+import java.util.Locale;
 import java.util.Set;
 
-import static android.R.id.list;
 
 
 /**
@@ -63,9 +80,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     private ContentResolver mContentResolver;
 
-    ReadRss rssParser = new ReadRss();
+    String title;
+    String date;
 
-    List<RSSItem> rssItems = new ArrayList<RSSItem>();
+
+
 
     List<Post>postItems = new ArrayList<Post>();
 
@@ -229,103 +248,41 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
 
 
-//    private void checkNotifications()
-//    {
-//        String order  = NewsContract.DATE+" DESC";
-//        Cursor c =  mContentResolver.query(NewsProvider.Lists.LISTS,new String[]{ NewsContract._ID,NewsContract.TITLE,NewsContract.DATE},null,null,order);
-//        c.moveToFirst();
-//        //get news title from SharedPreferences
-//        SharedPreferences notifications = getContext().getSharedPreferences(PREFNAME,Context.MODE_PRIVATE);
-//        String newsTitle = notifications.getString(getContext().getResources().getString(R.string.natition_key),"");
-//        Long date = notifications.getLong(getContext().getResources().getString(R.string.date_nattion_key),0);
-//
-//        if(newsTitle.length()>1){
-//            if (newsTitle.compareTo(c.getString(c.getColumnIndex(NewsContract.TITLE))) == 0 ) {
-//                Long cDate = Long.valueOf(c.getString(c.getColumnIndex(NewsContract.DATE)));
-//                if(date < cDate) {
-//                    showNotifications();
-//                    SharedPreferences.Editor editor = notifications.edit();
-//                    editor.putString(getContext().getResources().getString(R.string.natition_key), c.getString(c.getColumnIndex(NewsContract.TITLE))).commit();
-//                    editor.putLong(getContext().getResources().getString(R.string.date_nattion_key),cDate).commit();
-//                }
-//            }
-//        }else{
-//            Long cDate = Long.valueOf(c.getString(c.getColumnIndex(NewsContract.DATE)));
-//            showNotifications();
-//            SharedPreferences.Editor editor = notifications.edit();
-//            editor.putString(getContext().getResources().getString(R.string.natition_key), c.getString(c.getColumnIndex(NewsContract.TITLE))).commit();
-//            editor.putLong(getContext().getResources().getString(R.string.date_nattion_key),cDate).commit();
-//        }
-//
-//
-//        c.close();
-//    }
+    private void checkNotifications()
+    {
 
-//    private void showNotifications()
-//    {
-//        String order  = NewsContract.DATE+" DESC";
-//        Cursor c =  mContentResolver.query(NewsProvider.Lists.LISTS,new String[]{ NewsContract._ID,NewsContract.TITLE,NewsContract.DATE},null,null,order);
-//        c.moveToFirst();
-//        Intent resultIntent = new Intent(getContext(), DetailActivity.class);
-//        resultIntent.putExtra("news_id",c.getString(c.getColumnIndex(NewsContract._ID)));
-//        resultIntent.putExtra("news_fav","0");
-//
-//        PendingIntent resultPendingIntent =
-//                PendingIntent.getActivity(
-//                        getContext(),
-//                        0,
-//                        resultIntent,
-//                        PendingIntent.FLAG_UPDATE_CURRENT);
-//        Date date = new Date(Long.valueOf(c.getString(c.getColumnIndex(NewsContract.DATE))));
-//        SimpleDateFormat sdf = new SimpleDateFormat("d LLL yyyy  HH:mm", Locale.getDefault());
-//        String dateText = sdf.format(date);
-//
-//        NotificationCompat.Builder builder =
-//                new NotificationCompat.Builder(getContext())
-//                        .setSmallIcon(R.mipmap.ic_launcher)
-//                        .setDefaults(Notification.DEFAULT_ALL)
-//                        .setAutoCancel(true)
-//                        .setContentTitle(c.getString(c.getColumnIndex(NewsContract.TITLE)))
-//                        .setContentText(dateText);
-//
-//        builder.setContentIntent(resultPendingIntent);
-//        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getContext());
-//        notificationManager.notify(1, builder.build());
-//        c.close();
-//    }
+        String[] projection = {
+                NewsContract.Entry._ID,
+                NewsContract.Entry.COLUMN_NAME_TITLE,
 
-//    private void deleteOldData()
-//    {
-//        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
-//        String order  = NewsContract.Items.PUBLISHED_DATE+" ASC";
-//        String select = NewsContract.Items.FAVOURITE + " = ?";
-//        Uri dirUri = NewsContract.Items.buildDirUri();
-//        Cursor c =  mContentResolver.query(dirUri,
-//                new String[]{ NewsContract.Items._ID, NewsContract.Items.FAVOURITE},
-//                select,
-//                new String[]{"0"},
-//                order);
-//        int maxItem = Integer.valueOf(prefs.getString(getContext().getString(R.string.pref_maxitem_key),getContext().getString(R.string.pref_maxitem_default)));
-//        int deletNum = 0;
-//        if(c.getCount() >0 && c.getCount() > maxItem) {
-//            deletNum = c.getCount() - maxItem;
-//        }
-//        int[] deleID;
-//        if(deletNum != 0)
-//        {
-//            c.moveToFirst();
-//            deleID = new int[deletNum];
-//            for(int i = 0;i < deletNum;i++)
-//            {
-//                deleID[i] = Integer.valueOf(c.getString(c.getColumnIndex(NewsContract.Items._ID)));
-//                c.moveToNext();
-//            }
-//            for(int i = 0;i < deletNum;i++) {
-//                mContentResolver.delete(NewsContract.Lists.withId((long)deleID[i]),null,null);
-//            }
-//        }
-//        c.close();
-//    }
+                NewsContract.Entry.COLUMN_NAME_PUBLISHED,
+        };
+
+        String order  =  NewsContract.Entry.COLUMN_NAME_PUBLISHED + " DESC" + " LIMIT 1";
+        Cursor c =  mContentResolver.query(NewsContract.Entry.CONTENT_URI,projection,null,null,order);
+        c.moveToFirst();
+        //get news title from SharedPreferences
+        SharedPreferences notifications = getContext().getSharedPreferences(PREFNAME,Context.MODE_PRIVATE);
+        String newsTitle = notifications.getString(getContext().getResources().getString(R.string.notification_key),"");
+
+       // if(newsTitle.length()>1){
+            if (newsTitle.equals(c.getString(c.getColumnIndex(NewsContract.Entry.COLUMN_NAME_TITLE)) )) {
+
+                return;
+
+
+        }else{
+                showNotifications();
+                SharedPreferences.Editor editor = notifications.edit();
+                editor.putString(getContext().getResources().getString(R.string.notification_key), c.getString(c.getColumnIndex(NewsContract.Entry.COLUMN_NAME_TITLE))).apply();
+
+            }
+
+
+        c.close();
+    }
+
+
 
 //    private void upDateWidget()
 //    {
@@ -336,26 +293,30 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 //    }
 
 
-    private void insertEntry(Post entry) {
-
-
-
-
-        ContentValues values = new ContentValues();
-        values.clear();
-
-        values.put(NewsContract.Entry.COLUMN_NAME_TITLE, entry.getTitle());
-        values.put(NewsContract.Entry.COLUMN_NAME_LINK, entry.getUrl());
-        values.put(NewsContract.Entry.COLUMN_NAME_DESCRIPTION, entry.getContent());
-        values.put(NewsContract.Entry.COLUMN_NAME_IMAGE_URL, entry.getFeaturedImageUrl());
-        values.put(NewsContract.Entry.COLUMN_NAME_FAV, 0);
-        values.put(NewsContract.Entry.COLUMN_NAME_PUBLISHED, entry.getDate());
-       // values.put(NewsContract.Entry.COLUMN_NAME_CATEGORIES, changeToString(entry.getCategories()));
-
-
-
-        mContentResolver.insert(NewsContract.Entry.CONTENT_URI, values);
-    }
+//    private void insertEntry(Post entry) {
+//
+//
+//
+//
+//        ContentValues values = new ContentValues();
+//        values.clear();
+//
+//        values.put(NewsContract.Entry.COLUMN_NAME_TITLE, entry.getTitle());
+//        values.put(NewsContract.Entry.COLUMN_NAME_LINK, entry.getUrl());
+//        values.put(NewsContract.Entry.COLUMN_NAME_DESCRIPTION, entry.getContent());
+//        values.put(NewsContract.Entry.COLUMN_NAME_IMAGE_URL, entry.getFeaturedImageUrl());
+//        values.put(NewsContract.Entry.COLUMN_NAME_FAV, 0);
+//        values.put(NewsContract.Entry.COLUMN_NAME_PUBLISHED, entry.getDate());
+//
+//
+//
+//
+//        mContentResolver.insert(NewsContract.Entry.CONTENT_URI, values);
+//
+//
+//        deleteOldData();
+//
+//    }
 
     private class FetchNewsTask extends AsyncTask<Void,Void,Void>{
 
@@ -367,11 +328,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 loadNews(page);
 
            }
-
-
-
-
-
                 return null;
             }
 
@@ -399,6 +355,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                         // A temporary workaround to avoid downloading duplicate posts in some
                         // rare circumstances by converting ArrayList to a LinkedHashSet without
                         // losing its order
+
+                        ArrayList<ContentValues> cvArray = new ArrayList<>();
                         Set<Post> set = new LinkedHashSet<>(postItems);
                         postItems.clear();
                         postItems.addAll(new ArrayList<>(set));
@@ -412,9 +370,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             contentValues.put(NewsContract.Entry.COLUMN_NAME_LINK, item.getUrl());
                             contentValues.put(NewsContract.Entry.COLUMN_NAME_DESCRIPTION, item.getContent());
                             contentValues.put(NewsContract.Entry.COLUMN_NAME_FAV, 0);
-                            contentValues.put(NewsContract.Entry.COLUMN_NAME_PUBLISHED, item.getDate());
+                            contentValues.put(NewsContract.Entry.COLUMN_NAME_PUBLISHED, (item.getDate()));
                             contentValues.put(NewsContract.Entry.COLUMN_NAME_IMAGE_URL, item.getFeaturedImageUrl());
-                           // contentValues.put(NewsContract.Entry.COLUMN_NAME_CATEGORIES, changeToString(item.getCategories()));
 
 
                             String select = "(" + NewsContract.Entry.COLUMN_NAME_TITLE + " = ? )";
@@ -425,12 +382,31 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             if (check.getCount() > 0) {
                                 int columIndex = check.getColumnIndex(NewsContract.Entry.COLUMN_NAME_TITLE);
                                 if (item.getTitle().compareTo(check.getString(columIndex)) == 1) {
-                                    insertEntry(item);
+                                    cvArray.add(contentValues);
                                 }
-                            } else {
-                                insertEntry(item);
+                            }else {
+
+                                cvArray.add(contentValues);
                             }
+
                             check.close();
+                        }
+
+                        ContentValues[] cc = new ContentValues[cvArray.size()];
+                        cvArray.toArray(cc);
+
+                        if(cc.length>0) {
+
+                            mContentResolver.bulkInsert(NewsContract.Entry.CONTENT_URI, cc);
+
+
+                            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
+                            if ( prefs.getBoolean(getContext().getString(R.string.pref_notification_key), true)) {
+
+                                checkNotifications();
+
+                            }
+                            deleteOldData();
                         }
 
 
@@ -457,33 +433,92 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         AppController.getInstance().getRequestQueue().getCache().clear();
         // rssItems = rssParser.parse();
 
+
     }
 
-    public static String strSeparator = "__,__";
-    public static String convertArrayToString(String[] array){
-        String str = "";
-        for (int i = 0;i<array.length; i++) {
-            str = str+array[i];
-            // Do not append comma at the end of last element
-            if(i<array.length-1){
-                str = str+strSeparator;
+    private void deleteOldData()
+    {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
+        String order  = NewsContract.Entry.COLUMN_NAME_PUBLISHED+" ASC";
+        String select = NewsContract.Entry.COLUMN_NAME_FAV + " = ?";
+        Cursor c =  mContentResolver.query(NewsContract.Entry.CONTENT_URI,
+                new String[]{ NewsContract.Entry._ID,NewsContract.Entry.COLUMN_NAME_FAV},
+                select,
+                new String[]{"0"},
+                order);
+        int maxItem = Integer.valueOf(prefs.getString(getContext().getString(R.string.pref_max_item_key),getContext().getString(R.string.pref_max_item_default)));
+        int deletNum = 0;
+        if(c.getCount() >0 && c.getCount() > maxItem) {
+            deletNum = c.getCount() - maxItem;
+        }
+        int[] deleID;
+        if(deletNum != 0)
+        {
+            c.moveToFirst();
+            deleID = new int[deletNum];
+            for(int i = 0;i < deletNum;i++)
+            {
+                deleID[i] = Integer.valueOf(c.getString(c.getColumnIndex(NewsContract.Entry._ID)));
+                c.moveToNext();
+            }
+            for(int i = 0;i < deletNum;i++) {
+                mContentResolver.delete(NewsContract.Entry.buildItemUri((long)deleID[i]),null,null);
             }
         }
-        return str;
+        c.close();
+    }
+
+    private void showNotifications() {
+
+        String[] projection = {
+                NewsContract.Entry._ID,
+                NewsContract.Entry.COLUMN_NAME_TITLE,
+
+                NewsContract.Entry.COLUMN_NAME_PUBLISHED,
+        };
+
+
+
+        String order = NewsContract.Entry.COLUMN_NAME_PUBLISHED + " DESC" + " LIMIT 1";
+
+        ContentResolver resolver = getContext().getContentResolver();
+        Cursor cursor = resolver.query(NewsContract.Entry.CONTENT_URI, projection, null, null,
+                order );
+        if (cursor != null) {
+            cursor.moveToFirst();
+
+            int notificationId = 0x10;
+
+            Intent resultIntent = new Intent(getContext(), MainActivity.class);
+            //resultIntent.putExtra("news_id",c.getString(c.getColumnIndex(NewsContract.Entry._ID)));
+            // resultIntent.putExtra("news_fav","0");
+
+            PendingIntent resultPendingIntent =
+                    PendingIntent.getActivity(
+                            getContext(),
+                            0,
+                            resultIntent,
+                            PendingIntent.FLAG_UPDATE_CURRENT);
+           // Date date = new Date(Long.valueOf(cursor.getString(cursor.getColumnIndex(NewsContract.Entry.COLUMN_NAME_PUBLISHED))));
+           // SimpleDateFormat sdf = new SimpleDateFormat("d LLL yyyy  HH:mm", Locale.getDefault());
+           // String dateText = sdf.format(date);
+
+            NotificationCompat.Builder builder =
+                    new NotificationCompat.Builder(getContext())
+                            .setSmallIcon(R.mipmap.ic_launcher)
+                            .setDefaults(Notification.DEFAULT_ALL)
+                            .setAutoCancel(true)
+                            .setContentTitle(cursor.getString(cursor.getColumnIndex(NewsContract.Entry.COLUMN_NAME_TITLE)))
+                            .setContentText(cursor.getString(cursor.getColumnIndex(NewsContract.Entry.COLUMN_NAME_PUBLISHED)));
+
+            builder.setContentIntent(resultPendingIntent);
+            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getContext());
+            notificationManager.notify(++notificationId, builder.build());
+            cursor.close();
+        }
     }
 
 
-   String changeToString(ArrayList<String> list){
-
-       String listString = "";
-
-       for (String s : list)
-       {
-           listString += s + " ";
-       }
-
-       return listString;
-    }
 }
 
 

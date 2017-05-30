@@ -1,8 +1,9 @@
 package com.crossriverwatch.crossriverwatch.fragments;
 
 
+import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
@@ -19,12 +20,16 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.crossriverwatch.crossriverwatch.AppController;
+import com.crossriverwatch.crossriverwatch.utility.AppController;
+import com.crossriverwatch.crossriverwatch.activities.CategoryNewsDetail;
 import com.crossriverwatch.crossriverwatch.adapters.CategoryPostAdapter;
 import com.crossriverwatch.crossriverwatch.R;
 import com.crossriverwatch.crossriverwatch.parser.Config;
 import com.crossriverwatch.crossriverwatch.parser.JSONParser;
 import com.crossriverwatch.crossriverwatch.parser.Post;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.firebase.analytics.FirebaseAnalytics;
 
 import org.json.JSONObject;
 
@@ -39,6 +44,7 @@ import java.util.Set;
 public class SportsNews extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
 
     private static final String TAG = "SportsNews";
+    private AdView mAdView;
 
     protected static final String QUERY = "query";
     private SwipeRefreshLayout mSwipeRefreshLayout;
@@ -62,6 +68,9 @@ public class SportsNews extends Fragment implements SwipeRefreshLayout.OnRefresh
     // Keep track of the list items
     private int mPastVisibleItems;
     private int mVisibleItemCount;
+    private TextView catTextView;
+    ProgressDialog progressDialog;
+    private FirebaseAnalytics mFirebaseAnalytics;
 
 
 
@@ -75,7 +84,7 @@ public class SportsNews extends Fragment implements SwipeRefreshLayout.OnRefresh
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view =  inflater.inflate(R.layout.fragment_sports_news, container, false);
+        View view =  inflater.inflate(R.layout.fragment_business_news, container, false);
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_layout);
         mRecyclerView = (RecyclerView) view.findViewById(R.id.recycler_view_cat);
@@ -84,12 +93,32 @@ public class SportsNews extends Fragment implements SwipeRefreshLayout.OnRefresh
 
         // Pull to refresh listener
         mSwipeRefreshLayout.setOnRefreshListener(this);
+        catTextView = (TextView) view.findViewById(R.id.news_category);
+        catTextView.setVisibility(View.GONE);
+        catTextView.setText("Sports News");
+        progressDialog = new ProgressDialog(getActivity());
+        progressDialog.setMessage(getString(R.string.loading_news));
+        mAdView = (AdView) view.findViewById(R.id.adView);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(getActivity());
+
 
         // RecyclerView adaptor for Post object
         mAdaptor = new CategoryPostAdapter(postList, new CategoryPostAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(Post post) {
                 //mListener.onPostSelected(post, isSearch);
+                Intent feedDetail = new Intent(getActivity(), CategoryNewsDetail.class);
+                Bundle bundle = new Bundle();
+                bundle.putString("title", post.getTitle());
+                bundle.putString("url",post.getUrl());
+                bundle.putString("imageUrl",post.getFeaturedImageUrl());
+                bundle.putString("content",post.getContent());
+                bundle.putString("date",post.getDate());
+
+                feedDetail.putExtras(bundle);
+                startActivity(feedDetail);
             }
         });
 
@@ -120,7 +149,9 @@ public class SportsNews extends Fragment implements SwipeRefreshLayout.OnRefresh
             }
         });
 
-
+        Bundle bundle = new Bundle();
+        bundle.putString(FirebaseAnalytics.Param.VALUE, "open Sports News ");
+        mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.APP_OPEN, bundle);
 
         return view;
     }
@@ -239,16 +270,7 @@ public class SportsNews extends Fragment implements SwipeRefreshLayout.OnRefresh
                         volleyError.printStackTrace();
                         Log.d(TAG, "----- Error: " + volleyError.getMessage());
 
-                        // Show a Snackbar with a retry button
-                        Snackbar.make(mRecyclerView, R.string.error_load_posts,
-                                Snackbar.LENGTH_LONG).setAction(R.string.action_retry,
-                                new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View v) {
-                                        //loadFirstPage();
-                                        loadPosts(mPage, true);
-                                    }
-                                }).show();
+                       Toast.makeText(getActivity(),getString(R.string.error_load_posts),Toast.LENGTH_LONG).show();
                     }
                 });
 
@@ -273,16 +295,66 @@ public class SportsNews extends Fragment implements SwipeRefreshLayout.OnRefresh
      * Show the loading view and hide the list
      */
     private void showLoadingView() {
-        mRecyclerView.setVisibility(View.INVISIBLE);
-        mLoadingView.setVisibility(View.VISIBLE);
+        mRecyclerView.setVisibility(View.GONE);
+        progressDialog.show();
+        mSwipeRefreshLayout.setRefreshing(false);
+        catTextView.setVisibility(View.GONE);
+        mLoadingView.setVisibility(View.GONE);
+
     }
 
     /**
      * Hide the loading view and show the list
      */
     private void hideLoadingView() {
-        mLoadingView.setVisibility(View.INVISIBLE);
-        mRecyclerView.setVisibility(View.VISIBLE);
+
+        if(mAdaptor.getItemCount()==0){
+
+            mRecyclerView.setVisibility(View.GONE);
+            mLoadingView.setVisibility(View.VISIBLE);
+            catTextView.setVisibility(View.VISIBLE);
+            progressDialog.dismiss();
+        }else {
+
+            mRecyclerView.setVisibility(View.VISIBLE);
+            catTextView.setVisibility(View.VISIBLE);
+            progressDialog.dismiss();
+            mLoadingView.setVisibility(View.GONE);
+        }
+
     }
+
+    @Override
+    public void onPause() {
+        if (mAdView != null) {
+            mAdView.pause();
+        }
+        super.onPause();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        if (mAdView != null) {
+            mAdView.resume();
+        }
+
+    }
+
+
+
+
+    @Override
+    public void onDestroy() {
+
+        if (mAdView != null) {
+            mAdView.destroy();
+        }
+        super.onDestroy();
+    }
+
+
+
 
 }

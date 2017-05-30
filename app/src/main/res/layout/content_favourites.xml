@@ -2,18 +2,31 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:ads="http://schemas.android.com/apk/res-auto"
     android:id="@+id/content_favourites"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-
+    android:background="@drawable/grey_sandbag"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="com.crossriverwatch.crossriverwatch.Favourites"
+    tools:context="com.crossriverwatch.crossriverwatch.activities.Favourites"
     tools:showIn="@layout/activity_favourites">
+
+    <com.google.android.gms.ads.AdView
+        android:id="@+id/adView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+
+        ads:adSize="BANNER"
+        ads:adUnitId="@string/banner_ad_unit_id">
+    </com.google.android.gms.ads.AdView>
 
     <com.cooltechworks.views.shimmer.ShimmerRecyclerView
         android:id="@+id/shimmer_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_above="@+id/adView"
         android:paddingBottom="10dp"
         android:paddingTop="10dp"
         app:demo_child_count="10"

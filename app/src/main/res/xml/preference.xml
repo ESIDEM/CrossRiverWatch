@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <ListPreference
+        android:key="@string/pref_sync_key"
+        android:summary="%s"
+        android:title="@string/pref_title_sync_frequency"
+        android:dialogTitle="@string/pref_title_sync_frequency"
+        android:entries="@array/pref_sync_frequency_titles"
+        android:entryValues="@array/pref_sync_frequency_values"
+        android:defaultValue="@string/pref_title_sync_frequency_default" />
+    <ListPreference
+        android:key="@string/pref_max_item_key"
+        android:summary="%s"
+        android:title="@string/pref_title_max_item"
+        android:dialogTitle="@string/pref_title_max_item"
+        android:entries="@array/pref_max_item_title"
+        android:entryValues="@array/pref_max_item_values"
+        android:defaultValue="@string/pref_max_item_default" />
+    <CheckBoxPreference
+        android:key="@string/pref_sync_on_open_key"
+        android:title="@string/pref_sync_on_open_title"
+        android:defaultValue="true"
+        />
+    <CheckBoxPreference
+        android:key="@string/pref_notification_key"
+        android:title="@string/pref_notification_title"
+        android:defaultValue="true"
+        />
+    <Preference
+        android:key="@string/about_key"
+        android:title="@string/about">
+        <intent android:action="your.action.string"/>
+    </Preference>
+
+</PreferenceScreen>

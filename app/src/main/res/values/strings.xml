@@ -14,18 +14,13 @@
     <string name="network_check">Can\'t Load news item. \nPlease check your internet connection. </string>
     <string name="title_activity_favourite_news">Favourite News</string>
     <string name="favourite_news_list">Add News to your Favourite</string>
-    <string name="all_news_url">http://englishnews.thaipbs.or.th/feed/</string>
-    <string name="pref_maxitem_default">30</string>
-    <string name="pref_maxitem_key">max_item</string>
-    <string name="pref_title_maxitem">Max items</string>
-    <string name="rss_thaipbs">http://englishnews.thaipbs.or.th/feed/</string>
-    <string name="offline_text" translatable="true">Your Device appear to be Offline</string>
+    <string name="offline_text" translatable="true">Your Device appears to be Offline</string>
     <string name="nav_latest">Latest Post</string>
     <string name="nav_politics">Politics</string>
     <string name="nav_education">Education</string>
     <string name="Sport">Sports</string>
     <string name="nav_report">Report</string>
-    <string name="nav_vacancy">Vacancies</string>
+    <string name="nav_tech">Technology</string>
     <string name="nav_opinion">Opinions</string>
     <string name="nav_health">Health</string>
     <string name="nav_business">Business</string>
@@ -43,12 +38,61 @@
     <string name="title_activity_favourites">Favourites</string>
     <string name="search_hint">Search Movies</string>
     <string name="tab_all">All</string>
-    <string name="error_load_posts">Network error. Failed to load News.</string>
-    <string name="action_retry">Retry</string>
+    <string name="error_load_posts">Network error. \nFailed to load News. \nPlease pull down screen to refresh</string>
+
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="loading_news">Loading News...</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="title_activity_category_news_detail">CategoryNewsDetail</string>
+
+
+    <string name="pref_title_sync_frequency_default">60</string>
+    <string name="pref_sync_key">sync_fre</string>
+    <string name="pref_title_sync_frequency">Sync frequency</string>
+
+    <!--Max item setting-->
+    <string name="pref_max_item_default">30</string>
+    <string name="pref_max_item_key">max_item</string>
+    <string name="pref_title_max_item">Max News items displayed</string>
+
+    <!--Sync on open -->
+    <string name="pref_sync_on_open_key">open_sync</string>
+    <string name="pref_sync_on_open_title">Sync on open</string>
+    <string name="title_activity_settings">Settings</string>
+    <!--notification -->
+    <string name="pref_notification_key">notification</string>
+    <string name="pref_notification_title">Notification</string>
+    <string name="notification_key">notifications_key</string>
+    <string name="date_notification_key">date_natt_key</string>
+
+    <string name="fav_dialogue_message">Are you sure you want to clear your Favourite list ?</string>
+
+    <string name="banner_ad_unit_id" translatable="false">ca-app-pub-3707135972891536/1162700405</string>
+
+    <string name="slide_1_desc">Watching the Nation\'s Paradise</string>
+
+    <string name="slide_2_title">Add News to Favourite</string>
+    <string name="slide_2_desc">Click on the news you want to add your Favourite list,
+        on the Detail screen, tap on the love icon as shown above </string>
+
+    <string name="slide_3_title">Clear your Favourite List</string>
+    <string name="slide_3_desc">It is very important to frequently clear your favourite list
+        because your favourite list must not be more than the maximum number of items displaying </string>
+
+    <string name="invitation_message">Hello, get the latest news in phone with this App</string>
+    <string name="invitation_cta">Call to action</string>
+    <string name="invitation_title">CrossRiverWatch App Invite</string>
+    <string name="menu_invite">Tell a friend </string>
+    <string name="about">About</string>
+    <string name="about_key">about</string>
+    <string name="app_version">Version 1.0.0</string>
+    <string name="developed_by">All Rights Reserved.</string>
+    <string name="start_innovation_hub">Start Innovation Hub</string>
+    <string name="all_logos_images_videos_and_post_are_properties_of">All Logos, Images, Videos and Posts of the App are fetched from </string>
+    <string name="for_text">Technical Partners:</string>
+    <string name="crossriverwatch">www.crossriverwatch.com</string>
+
+
 </resources>

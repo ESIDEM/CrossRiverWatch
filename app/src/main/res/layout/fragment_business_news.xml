@@ -1,14 +1,40 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:ads="http://schemas.android.com/apk/res-auto"
     tools:context="com.crossriverwatch.crossriverwatch.fragments.BusinessNews">
+
+    <TextView
+        android:paddingTop="10dp"
+        android:paddingLeft="10dp"
+        android:paddingStart="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/news_category"
+
+        />
+
+    <com.google.android.gms.ads.AdView
+        android:id="@+id/adView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+
+        ads:adSize="BANNER"
+        ads:adUnitId="@string/banner_ad_unit_id">
+    </com.google.android.gms.ads.AdView>
+
 
     <!-- Article list -->
     <android.support.v4.widget.SwipeRefreshLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/swipe_refresh_layout" >
+        android:id="@+id/swipe_refresh_layout"
+        android:layout_below="@+id/news_category"
+        android:layout_above="@+id/adView">
+
 
         <android.support.v7.widget.RecyclerView
             android:layout_width="match_parent"
@@ -24,6 +50,6 @@
         android:id="@+id/text_view_loading"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:gravity="center"
-        android:text="@string/loading_news"/>
+        android:text="@string/error_load_posts"/>
 
-</FrameLayout>
+</RelativeLayout>

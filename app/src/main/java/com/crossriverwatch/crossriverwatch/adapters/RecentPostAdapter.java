@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,9 +14,13 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+
 import com.crossriverwatch.crossriverwatch.utility.MyLoader;
-import com.crossriverwatch.crossriverwatch.NewsDetailActivity;
+import com.crossriverwatch.crossriverwatch.activities.NewsDetailActivity;
 import com.crossriverwatch.crossriverwatch.R;
+import com.google.firebase.appindexing.FirebaseAppIndex;
+import com.google.firebase.appindexing.Indexable;
+import com.google.firebase.appindexing.builders.Indexables;
 
 
 /**
@@ -32,8 +37,9 @@ public class RecentPostAdapter extends RecyclerView.Adapter<RecentPostAdapter.Vi
     private Context mContext;
 
 
-    public RecentPostAdapter(Cursor cursor) {
+    public RecentPostAdapter(Context context, Cursor cursor) {
         mCursor = cursor;
+        this.mContext = context;
     }
 
     @Override
@@ -73,16 +79,28 @@ public class RecentPostAdapter extends RecyclerView.Adapter<RecentPostAdapter.Vi
     }
 
 
+
+
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         mCursor.moveToPosition(position);
-        holder.titleView.setText(mCursor.getString(MyLoader.Query.COLUMN_TITLE));
+        holder.titleView.setText(Html.fromHtml(mCursor.getString(MyLoader.Query.COLUMN_TITLE)));
 
         holder.pubDate.setText(mCursor.getString(MyLoader.Query.COLUMN_PUB_DATE));
 
         // holder.category.setText(mCursor.getString(MyLoader.Query.COLUMN_CAT));
         // holder.description.setText(mCursor.getString(MyLoader.Query.COLUMN_DESC));
         final String favourite = mCursor.getString(MyLoader.Query.COLUMN_FAV);
+
+
+        Indexable messageToIndex = Indexables.messageBuilder()
+                .setName(String.valueOf(Html.fromHtml(mCursor.getString(MyLoader.Query.COLUMN_DESC))))
+                .setUrl(String.valueOf(Html.fromHtml(mCursor.getString(MyLoader.Query.COLUMN_LINK))))
+
+                .build();
+
+        FirebaseAppIndex.getInstance().update(messageToIndex);
+
 
 
         Glide.with(holder.thumbnailView.getContext()).load(mCursor.getString(
@@ -131,4 +149,6 @@ public class RecentPostAdapter extends RecyclerView.Adapter<RecentPostAdapter.Vi
 
         }
     }
+
+
 }

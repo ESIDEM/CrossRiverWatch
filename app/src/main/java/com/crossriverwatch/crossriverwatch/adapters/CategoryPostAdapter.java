@@ -2,6 +2,7 @@ package com.crossriverwatch.crossriverwatch.adapters;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -51,7 +52,7 @@ public class CategoryPostAdapter extends RecyclerView.Adapter<CategoryPostAdapte
                 .centerCrop()
                 .into(viewHolder.thumbnailImageView);
 
-        viewHolder.title.setText(posts.get(i).getTitle());
+        viewHolder.title.setText(Html.fromHtml(posts.get(i).getTitle()));
 
         viewHolder.dateView.setText(posts.get(i).getDate());
 
@@ -59,6 +60,17 @@ public class CategoryPostAdapter extends RecyclerView.Adapter<CategoryPostAdapte
             @Override
             public void onClick(View v) {
                 mListener.onItemClick(posts.get(i));
+
+//                String url =
+//
+//                Intent feedDetail = new Intent(mContext.getApplicationContext(), CategoryNewsDetail.class);
+//                Bundle bundle = new Bundle();
+//                bundle.putLong("rowId", rowId);
+//
+//                feedDetail.putExtras(bundle);
+//                mContext.startActivity(feedDetail);
+
+                
             }
         });
     }

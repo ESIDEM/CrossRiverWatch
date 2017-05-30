@@ -22,7 +22,7 @@ public class MyLoader extends CursorLoader {
 
 
     private MyLoader(Context context, Uri uri) {
-        super(context, uri, Query.PROJECTION, null, null, NewsContract.Entry.COLUMN_NAME_PUBLISHED + " DESC");
+        super(context, uri, Query.PROJECTION, null, null, NewsContract.Entry.COLUMN_NAME_PUBLISHED + " DESC" );
     }
 
     public interface Query {

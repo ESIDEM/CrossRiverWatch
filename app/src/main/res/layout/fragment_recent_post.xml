@@ -4,14 +4,40 @@
     android:id="@+id/content_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:ads="http://schemas.android.com/apk/res-auto"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="com.crossriverwatch.crossriverwatch.fragments.RecentPost"
-    tools:showIn="@layout/app_bar_main">
+    >
+
+    <TextView
+        android:paddingTop="10dp"
+        android:paddingLeft="10dp"
+        android:paddingStart="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/news_category"
+
+        />
+
+    <com.google.android.gms.ads.AdView
+        android:id="@+id/adView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+
+        ads:adSize="BANNER"
+        ads:adUnitId="@string/banner_ad_unit_id">
+    </com.google.android.gms.ads.AdView>
+
 
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/swipeContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@+id/news_category"
+        android:layout_above="@+id/adView"
+
         >
 
         <!--<android.support.v7.widget.RecyclerView-->
@@ -23,9 +49,9 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:paddingBottom="10dp"
-            android:paddingTop="10dp"
+
             app:demo_child_count="10"
-            app:demo_layout="@layout/layout_demo"
+
             />
     </android.support.v4.widget.SwipeRefreshLayout>
     <TextView
